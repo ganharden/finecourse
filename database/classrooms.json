@@ -1,0 +1,250 @@
+[
+  {
+    "id": "R001",
+    "name": "A101",
+    "capacity": 60,
+    "building": "教学楼A",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R002",
+    "name": "A102",
+    "capacity": 50,
+    "building": "教学楼A",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R003",
+    "name": "A103",
+    "capacity": 45,
+    "building": "教学楼A",
+    "equipment": [
+      "投影仪",
+      "音响",
+      "空调"
+    ],
+    "type": "普通教室"
+  },
+  {
+    "id": "R004",
+    "name": "A201",
+    "capacity": 80,
+    "building": "教学楼A",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调",
+      "麦克风"
+    ],
+    "type": "大型多媒体教室"
+  },
+  {
+    "id": "R005",
+    "name": "A202",
+    "capacity": 70,
+    "building": "教学楼A",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R006",
+    "name": "B101",
+    "capacity": 60,
+    "building": "教学楼B",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R007",
+    "name": "B102",
+    "capacity": 55,
+    "building": "教学楼B",
+    "equipment": [
+      "投影仪",
+      "空调"
+    ],
+    "type": "普通教室"
+  },
+  {
+    "id": "R008",
+    "name": "B103",
+    "capacity": 40,
+    "building": "教学楼B",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R009",
+    "name": "B201",
+    "capacity": 100,
+    "building": "教学楼B",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调",
+      "麦克风",
+      "录播"
+    ],
+    "type": "大型报告厅"
+  },
+  {
+    "id": "R010",
+    "name": "B202",
+    "capacity": 65,
+    "building": "教学楼B",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调"
+    ],
+    "type": "多媒体教室"
+  },
+  {
+    "id": "R011",
+    "name": "C101",
+    "capacity": 30,
+    "building": "实验楼C",
+    "equipment": [
+      "实验台",
+      "电脑",
+      "空调"
+    ],
+    "type": "计算机实验室"
+  },
+  {
+    "id": "R012",
+    "name": "C102",
+    "capacity": 30,
+    "building": "实验楼C",
+    "equipment": [
+      "实验台",
+      "电脑",
+      "空调"
+    ],
+    "type": "计算机实验室"
+  },
+  {
+    "id": "R013",
+    "name": "C103",
+    "capacity": 25,
+    "building": "实验楼C",
+    "equipment": [
+      "实验台",
+      "仪器",
+      "空调"
+    ],
+    "type": "物理实验室"
+  },
+  {
+    "id": "R014",
+    "name": "C104",
+    "capacity": 25,
+    "building": "实验楼C",
+    "equipment": [
+      "实验台",
+      "仪器",
+      "空调"
+    ],
+    "type": "化学实验室"
+  },
+  {
+    "id": "R015",
+    "name": "D101",
+    "capacity": 35,
+    "building": "外语楼D",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调",
+      "语音设备"
+    ],
+    "type": "语音教室"
+  },
+  {
+    "id": "R016",
+    "name": "D102",
+    "capacity": 30,
+    "building": "外语楼D",
+    "equipment": [
+      "投影仪",
+      "电脑",
+      "音响",
+      "空调",
+      "语音设备"
+    ],
+    "type": "语音教室"
+  },
+  {
+    "id": "R017",
+    "name": "E101",
+    "capacity": 50,
+    "building": "文科院E",
+    "equipment": [
+      "投影仪",
+      "空调"
+    ],
+    "type": "普通教室"
+  },
+  {
+    "id": "R018",
+    "name": "E102",
+    "capacity": 45,
+    "building": "文科院E",
+    "equipment": [
+      "投影仪",
+      "空调"
+    ],
+    "type": "普通教室"
+  },
+  {
+    "id": "R019",
+    "name": "GYM1",
+    "capacity": 50,
+    "building": "体育馆",
+    "equipment": [
+      "空调",
+      "、更衣室"
+    ],
+    "type": "室内体育场"
+  },
+  {
+    "id": "R020",
+    "name": "GYM2",
+    "capacity": 30,
+    "building": "体育馆",
+    "equipment": [
+      "空调",
+      "、更衣室"
+    ],
+    "type": "室内体育场"
+  }
+]

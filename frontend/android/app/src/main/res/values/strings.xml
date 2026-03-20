@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">FineCourse</string>
+    <string name="title_activity_main">FineCourse</string>
+    <string name="package_name">com.finecourse.app</string>
+    <string name="custom_url_scheme">com.finecourse.app</string>
+</resources>

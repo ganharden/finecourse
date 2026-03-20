@@ -1,0 +1,7 @@
+node_modules
+*.log
+frontend.backup.*
+.*.swp
+.sass-cache
+.idea
+**/.DS_Store

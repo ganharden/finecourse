@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>精课程管理系统 - FineCourse</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif; }
+        :root {
+            --primary: #2563eb; --accent: #3b82f6; --light-blue: #dbeafe;
+            --dark: #1e40af; --success: #10b981; --warning: #f59e0b;
+            --text: #1f2937; --text-light: #6b7280; --text-muted: #9ca3af;
+            --bg: #f8fafc; --white: #ffffff; --border: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+        }
+        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+        
+        /* Sidebar */
+        .sidebar { width: 240px; background: var(--white); border-right: 1px solid var(--border); padding: 20px 0; position: fixed; height: 100vh; box-shadow: var(--shadow); }
+        .logo { text-align: center; padding: 20px; font-size: 22px; font-weight: bold; color: var(--primary); border-bottom: 1px solid var(--border); margin-bottom: 20px; }
+        .logo i { margin-right: 8px; color: var(--accent); }
+        .nav-item { padding: 14px 25px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; color: var(--text-light); border-left: 3px solid transparent; }
+        .nav-item:hover { background: var(--light-blue); color: var(--primary); }
+        .nav-item.active { background: var(--light-blue); color: var(--primary); border-left-color: var(--primary); }
+        .nav-item i { width: 25px; margin-right: 12px; }
+
+        /* Main Content */
+        .main { flex: 1; margin-left: 240px; padding: 20px; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: var(--white); border-radius: 12px; margin-bottom: 25px; box-shadow: var(--shadow); }
+        .header h1 { font-size: 22px; color: var(--dark); }
+        .current-time { color: var(--text-light); font-size: 14px; }
+
+        /* Stats Cards */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--white); border-radius: 12px; padding: 20px; border: 1px solid var(--border); transition: all 0.2s; cursor: pointer; }
+        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(37,99,235,0.15); border-color: var(--accent); }
+        .stat-card .icon { width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; margin-bottom: 12px; }
+        .stat-card .icon.courses { background: #dbeafe; color: var(--primary); }
+        .stat-card .icon.teachers { background: #d1fae5; color: var(--success); }
+        .stat-card .icon.students { background: #fef3c7; color: var(--warning); }
+        .stat-card .icon.classrooms { background: #e0e7ff; color: #6366f1; }
+        .stat-card .value { font-size: 28px; font-weight: bold; color: var(--dark); margin-bottom: 4px; }
+        .stat-card .label { color: var(--text-light); font-size: 13px; }
+        .stat-card .hint { font-size: 11px; color: var(--primary); margin-top: 8px; opacity: 0; transition: opacity 0.2s; }
+        .stat-card:hover .hint { opacity: 1; }
+
+        /* Section */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* Tables */
+        .data-table { width: 100%; background: var(--white); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .data-table th, .data-table td { padding: 12px 15px; text-align: left; }
+        .data-table th { background: var(--light-blue); color: var(--primary); font-weight: 600; }
+        .data-table tr { border-bottom: 1px solid var(--border); }
+        .data-table tbody tr:hover { background: #f9fafb; }
+        .data-table .student-name { color: var(--success); font-weight: 500; }
+
+        /* Buttons */
+        .btn { padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; }
+        .btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
+        .search-box input { padding: 10px 15px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--text); width: 200px; }
+        .search-box input:focus { outline: none; border-color: var(--primary); }
+
+        /* Schedule Grid */
+        .schedule-grid { background: var(--white); border-radius: 12px; padding: 15px; border: 1px solid var(--border); overflow-x: auto; box-shadow: var(--shadow); }
+        .schedule-table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        .schedule-table th, .schedule-table td { padding: 8px; text-align: center; border: 1px solid var(--border); }
+        .schedule-table th { background: var(--light-blue); color: var(--primary); font-size: 13px; }
+        .schedule-table td { min-height: 60px; height: 60px; vertical-align: top; }
+        .schedule-cell { padding: 6px; border-radius: 6px; font-size: 11px; min-height: 50px; display: flex; flex-direction: column; justify-content: center; gap: 2px; background: #dbeafe; border: 1px solid #bfdbfe; }
+        .schedule-cell .course-name { color: var(--primary); font-weight: 600; font-size: 12px; }
+        .schedule-cell .teacher-name { color: var(--text-light); font-size: 10px; }
+        .schedule-cell .classroom { color: #6366f1; font-size: 10px; }
+        .schedule-cell .class-name { color: #dc2626; font-size: 10px; }
+
+        /* Tags */
+        .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; margin: 2px; }
+        .tag.required { background: #dbeafe; color: var(--primary); }
+        .tag.elective { background: #d1fae5; color: var(--success); }
+
+        /* Modal */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--white); border-radius: 16px; padding: 25px; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); }
+        .modal h2 { margin-bottom: 20px; color: var(--dark); font-size: 18px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; color: var(--text-light); font-size: 13px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--white); color: var(--text); font-size: 14px; }
+        .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
+
+        /* Toast */
+        .toast { position: fixed; bottom: 25px; right: 25px; padding: 12px 20px; border-radius: 10px; color: white; font-weight: 500; transform: translateX(400px); transition: transform 0.3s; z-index: 2000; }
+        .toast.show { transform: translateX(0); }
+        .toast.success { background: var(--success); }
+        .toast.error { background: #ef4444; }
+        .toast.warning { background: var(--warning); }
+
+        /* Detail Panel */
+        .detail-panel { background: var(--white); border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .detail-panel h3 { color: var(--dark); margin-bottom: 15px; display: flex; align-items: center; gap: 10px; font-size: 16px; }
+        .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; max-height: 350px; overflow-y: auto; }
+        .detail-item { background: #f9fafb; padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; }
+        .detail-item i { color: var(--success); width: 18px; }
+        .detail-item .name { color: var(--text); font-weight: 500; font-size: 13px; }
+        .detail-item .info { color: var(--text-light); font-size: 11px; }
+
+        .student-selector { display: flex; gap: 10px; align-items: center; }
+        .student-selector select { padding: 10px; border-radius: 8px; background: var(--white); color: var(--text); border: 1px solid var(--border); min-width: 200px; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 3px; }
+        
+        .action-btns { display: flex; gap: 5px; }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-light); }
+        .empty-state i { font-size: 40px; margin-bottom: 15px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo"><i class="fas fa-graduation-cap"></i> FineCourse</div>
+        <div class="nav-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> 仪表盘</div>
+        <div class="nav-item" data-section="courses"><i class="fas fa-book"></i> 课程管理</div>
+        <div class="nav-item" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i> 教师管理</div>
+        <div class="nav-item" data-section="students"><i class="fas fa-user-graduate"></i> 学生管理</div>
+        <div class="nav-item" data-section="classrooms"><i class="fas fa-door-open"></i> 教室管理</div>
+        <div class="nav-item" data-section="schedule"><i class="fas fa-calendar-alt"></i> 排课管理</div>
+        <div class="nav-item" data-section="my-schedule"><i class="fas fa-user-clock"></i> 我的课表</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main">
+        <div class="header">
+            <h1 id="pageTitle">仪表盘</h1>
+            <div class="current-time" id="currentTime"></div>
+        </div>
+
+        <!-- Dashboard -->
+        <div class="section active" id="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="showDetail('courses')">
+                    <div class="icon courses"><i class="fas fa-book"></i></div>
+                    <div class="value" id="statCourses">-</div>
+                    <div class="label">课程总数</div>
+                    <div class="hint"><i class="fas fa-hand-pointer"></i> 点击查看</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('teachers')">
+                    <div class="icon teachers"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <div class="value" id="statTeachers">-</div>
+                    <div class="label">教师总数</div>
+                    <div class="hint"><i class="fas fa-hand-pointer"></i> 点击查看</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('students')">
+                    <div class="icon students"><i class="fas fa-user-graduate"></i></div>
+                    <div class="value" id="statStudents">-</div>
+                    <div class="label">学生总数</div>
+                    <div class="hint"><i class="fas fa-hand-pointer"></i> 点击查看</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('classrooms')">
+                    <div class="icon classrooms"><i class="fas fa-door-open"></i></div>
+                    <div class="value" id="statClassrooms">-</div>
+                    <div class="label">教室总数</div>
+                    <div class="hint"><i class="fas fa-hand-pointer"></i> 点击查看</div>
+                </div>
+            </div>
+            <div id="dashboardDetail"></div>
+        </div>
+
+        <!-- Courses -->
+        <div class="section" id="courses">
+            <div class="toolbar">
+                <div class="search-box"><input type="text" placeholder="搜索课程..." id="courseSearch"></div>
+                <button class="btn btn-primary" onclick="openCourseModal()"><i class="fas fa-plus"></i> 添加课程</button>
+            </div>
+            <div id="coursesTable"></div>
+        </div>
+
+        <!-- Teachers -->
+        <div class="section" id="teachers">
+            <div class="toolbar">
+                <div class="search-box"><input type="text" placeholder="搜索教师..." id="teacherSearch"></div>
+                <button class="btn btn-primary" onclick="openTeacherModal()"><i class="fas fa-plus"></i> 添加教师</button>
+            </div>
+            <div id="teachersTable"></div>
+        </div>
+
+        <!-- Students -->
+        <div class="section" id="students">
+            <div class="toolbar">
+                <div class="search-box"><input type="text" placeholder="搜索学生..." id="studentSearch"></div>
+                <button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-plus"></i> 添加学生</button>
+            </div>
+            <div id="studentsTable"></div>
+        </div>
+
+        <!-- Classrooms -->
+        <div class="section" id="classrooms">
+            <div class="toolbar">
+                <div class="search-box"><input type="text" placeholder="搜索教室..." id="classroomSearch"></div>
+                <button class="btn btn-primary" onclick="openClassroomModal()"><i class="fas fa-plus"></i> 添加教室</button>
+            </div>
+            <div id="classroomsTable"></div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="section" id="schedule">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <label>选择老师：</label>
+                    <select id="teacherScheduleSelect" onchange="filterScheduleByTeacher()" style="padding:10px 12px;border-radius:8px;background:var(--white);color:var(--text);border:1px solid var(--border);min-width:200px;">
+                        <option value="">-- 请选择老师 --</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-success" onclick="autoSchedule()"><i class="fas fa-magic"></i> 智能排课</button>
+                    <button class="btn btn-primary" onclick="openScheduleModal()"><i class="fas fa-plus"></i> 手动排课</button>
+                    <button class="btn btn-danger" onclick="clearSchedule()"><i class="fas fa-trash"></i> 清空</button>
+                </div>
+            </div>
+            <div id="scheduleByTeacher"></div>
+            <div class="schedule-grid" id="scheduleGrid" style="display:none;"></div>
+        </div>
+
+        <!-- My Schedule -->
+        <div class="section" id="my-schedule">
+            <div class="toolbar">
+                <div class="student-selector">
+                    <label>选择班级：</label>
+                    <select id="studentSelect" onchange="loadStudentSchedule()">
+                        <option value="">-- 请选择班级 --</option>
+                    </select>
+                </div>
+            </div>
+            <div id="studentScheduleView"></div>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+        <div class="modal" id="modalContent"></div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const API = 'http://localhost:3001/api';
+        let currentData = { courses: [], teachers: [], students: [], classrooms: [], classes: [], schedules: [] };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStats();
+            loadStudentsForSelect();
+            updateTime();
+            setInterval(updateTime, 1000);
+            setupNavigation();
+            setupSearch();
+        });
+
+        function updateTime() {
+            document.getElementById('currentTime').textContent = new Date().toLocaleString('zh-CN', { weekday: 'short', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function setupNavigation() {
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const section = item.dataset.section;
+                    showSection(section);
+                });
+            });
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById(section).classList.add('active');
+            const titles = { dashboard: '仪表盘', courses: '课程管理', teachers: '教师管理', students: '学生管理', classrooms: '教室管理', schedule: '排课管理', 'my-schedule': '我的课表' };
+            document.getElementById('pageTitle').textContent = titles[section];
+            if (section !== 'dashboard') document.getElementById('dashboardDetail').innerHTML = '';
+            loadSectionData(section);
+        }
+
+        async function loadSectionData(section) {
+            switch(section) {
+                case 'dashboard': loadStats(); break;
+                case 'courses': loadCourses(); break;
+                case 'teachers': loadTeachers(); break;
+                case 'students': loadStudents(); break;
+                case 'classrooms': loadClassrooms(); break;
+                case 'schedule': loadSchedule(); break;
+                case 'my-schedule': loadStudentsForSelect(); break;
+            }
+        }
+
+        async function showDetail(type) {
+            const container = document.getElementById('dashboardDetail');
+            let html = '<div class="detail-panel"><h3>';
+            try {
+                if (type === 'courses') {
+                    const data = await fetch(`${API}/courses`).then(r => r.json());
+                    html += `<i class="fas fa-book"></i> 课程列表 (${data.length} 门)</h3><div class="detail-grid">`;
+                    html += data.map(c => `<div class="detail-item"><i class="fas fa-book"></i><div><div class="name">${c.name}</div><div class="info">${c.id} | ${c.category} | ${c.credits}学分</div></div></div>`).join('');
+                } else if (type === 'teachers') {
+                    const data = await fetch(`${API}/teachers`).then(r => r.json());
+                    html += `<i class="fas fa-chalkboard-teacher"></i> 教师列表 (${data.length} 人)</h3><div class="detail-grid">`;
+                    html += data.map(t => `<div class="detail-item"><i class="fas fa-user"></i><div><div class="name">${t.name}</div><div class="info">${t.id} | ${t.subject}</div></div></div>`).join('');
+                } else if (type === 'students') {
+                    const data = await fetch(`${API}/students`).then(r => r.json());
+                    html += `<i class="fas fa-user-graduate"></i> 学生列表 (${data.length} 人)</h3><div class="detail-grid">`;
+                    html += data.map(s => `<div class="detail-item"><i class="fas fa-user"></i><div><div class="name">${s.name}</div><div class="info">${s.class}</div></div></div>`).join('');
+                } else if (type === 'classrooms') {
+                    const data = await fetch(`${API}/classrooms`).then(r => r.json());
+                    html += `<i class="fas fa-door-open"></i> 教室列表 (${data.length} 间)</h3><div class="detail-grid">`;
+                    html += data.map(r => `<div class="detail-item"><i class="fas fa-door-open"></i><div><div class="name">${r.name}</div><div class="info">${r.building} | ${r.capacity}人</div></div></div>`).join('');
+                }
+                html += '</div></div>';
+                container.innerHTML = html;
+            } catch(e) { showToast('加载失败', 'error'); }
+        }
+
+        async function loadStats() {
+            const res = await fetch(`${API}/stats`);
+            const data = await res.json();
+            document.getElementById('statCourses').textContent = data.courses;
+            document.getElementById('statTeachers').textContent = data.teachers;
+            document.getElementById('statStudents').textContent = data.students;
+            document.getElementById('statClassrooms').textContent = data.classrooms;
+        }
+
+        async function loadCourses() { currentData.courses = await fetch(`${API}/courses`).then(r => r.json()); renderCourses(currentData.courses); }
+        async function loadTeachers() { currentData.teachers = await fetch(`${API}/teachers`).then(r => r.json()); renderTeachers(currentData.teachers); const ts = document.getElementById('teacherScheduleSelect'); if(ts) ts.innerHTML = '<option value="">-- 请选择老师 --</option>' + currentData.teachers.map(t => `<option value="${t.id}">${t.name} - ${t.subject}老师</option>`).join(''); }
+        async function loadStudents() { currentData.students = await fetch(`${API}/students`).then(r => r.json()); renderStudents(currentData.students); }
+        async function loadClassrooms() { currentData.classrooms = await fetch(`${API}/classrooms`).then(r => r.json()); renderClassrooms(currentData.classrooms); }
+
+        async function loadSchedule() {
+            const [schedulesRes, coursesRes, teachersRes, classroomsRes, classesRes] = await Promise.all([
+                fetch(`${API}/schedules`), fetch(`${API}/courses`), fetch(`${API}/teachers`), fetch(`${API}/classrooms`), fetch(`${API}/classes`)
+            ]);
+            currentData.schedules = await schedulesRes.json();
+            const courses = await coursesRes.json();
+            const teachers = await teachersRes.json();
+            const classrooms = await classroomsRes.json();
+            const classes = await classesRes.json();
+            currentData.classes = classes;
+            currentData.teachers = teachers;
+            currentData.courses = courses;
+            currentData.classrooms = classrooms;
+            // 加载教师下拉框选项
+            const ts = document.getElementById('teacherScheduleSelect');
+            if(ts) ts.innerHTML = '<option value="">-- 请选择老师 --</option>' + teachers.map(t => `<option value="${t.id}">${t.name} - ${t.subject}老师</option>`).join('');
+            document.getElementById('scheduleByTeacher').innerHTML = '<p style="color:var(--text-light);text-align:center;padding:40px;">请选择一位老师查看其课表</p>';
+            document.getElementById('scheduleGrid').style.display = 'none';
+        }
+
+        async function filterScheduleByTeacher() {
+            const teacherId = document.getElementById('teacherScheduleSelect').value;
+            const container = document.getElementById('scheduleByTeacher');
+            if (!teacherId) { container.innerHTML = '<p style="color:var(--text-light);text-align:center;padding:40px;">请选择一位老师查看其课表</p>'; return; }
+            const [schedulesRes, coursesRes, teachersRes, classroomsRes, classesRes] = await Promise.all([fetch(`${API}/schedules`), fetch(`${API}/courses`), fetch(`${API}/teachers`), fetch(`${API}/classrooms`), fetch(`${API}/classes`)]);
+            const schedules = await schedulesRes.json();
+            const courses = await coursesRes.json();
+            const teachers = await teachersRes.json();
+            const classrooms = await classroomsRes.json();
+            const classes = await classesRes.json();
+            const teacherSchedules = schedules.filter(s => s.teacherId === teacherId);
+            const teacher = teachers.find(t => t.id === teacherId);
+            const courseMap = Object.fromEntries(courses.map(c => [c.id, c]));
+            const classroomMap = Object.fromEntries(classrooms.map(r => [r.id, r]));
+            const classMap = Object.fromEntries(classes.map(c => [c.id, c]));
+            const days = ['周一', '周二', '周三', '周四', '周五'];
+            
+            if (!teacherSchedules.length) { container.innerHTML = `<div class="detail-panel"><h3><i class="fas fa-chalkboard-teacher"></i> ${teacher?.name || ''} 老师的课表</h3><p style="color:var(--text-light)">暂无排课</p></div>`; return; }
+            
+            let html = `<div class="detail-panel"><h3><i class="fas fa-chalkboard-teacher"></i> ${teacher.name} 老师 (${teacher.subject}) 的课表</h3>`;
+            html += `<div class="schedule-grid" style="display:block;"><table class="schedule-table"><thead><tr><th>时间</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+            for (let section = 1; section <= 8; section++) {
+                html += `<tr><td>第${section}节</td>`;
+                for (let day = 1; day <= 5; day++) {
+                    const scheds = teacherSchedules.filter(s => s.dayOfWeek === day && s.startSection <= section && s.endSection >= section);
+                    if (scheds.length) { html += `<td>${scheds.map(sch => { const c = courseMap[sch.courseId] || {}; const r = classroomMap[sch.classroomId] || {}; const cls = classMap[sch.classId] || {}; return `<div class="schedule-cell"><div class="course-name">${sch.courseName || c.name || sch.courseId}</div><div class="teacher-name">📍 ${r.name || sch.classroomId}</div><div class="class-name">${cls.name || sch.classId}</div></div>`; }).join('')}</td>`; }
+                    else { html += `<td></td>`; }
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table></div></div>`;
+            container.innerHTML = html;
+        }
+
+        async function loadStudentsForSelect() {
+            const classes = await fetch(`${API}/classes`).then(r => r.json());
+            document.getElementById('studentSelect').innerHTML = '<option value="">-- 请选择班级 --</option>' + classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        async function loadStudentSchedule() {
+            const classId = document.getElementById('studentSelect').value;
+            const container = document.getElementById('studentScheduleView');
+            if (!classId) { container.innerHTML = ''; return; }
+            const [schedules, courses, teachers, classrooms, classes] = await Promise.all([fetch(`${API}/schedules`), fetch(`${API}/courses`), fetch(`${API}/teachers`), fetch(`${API}/classrooms`), fetch(`${API}/classes`)]);
+            const cls = (await classes.json()).find(c => c.id === classId);
+            const classSchedules = (await schedules.json()).filter(s => s.classId === classId);
+            const courseMap = Object.fromEntries((await courses.json()).map(c => [c.id, c]));
+            const teacherMap = Object.fromEntries((await teachers.json()).map(t => [t.id, t]));
+            const classroomMap = Object.fromEntries((await classrooms.json()).map(r => [r.id, r]));
+            const days = ['周一', '周二', '周三', '周四', '周五'];
+            
+            let html = `<div class="detail-panel"><h3><i class="fas fa-users"></i> ${cls?.name || ''} 课表</h3>`;
+            html += `<div class="schedule-grid" style="display:block;"><table class="schedule-table"><thead><tr><th>时间</th>${days.map(d=>`<th>${d}</th>`).join('')}</tr></thead><tbody>`;
+            for (let section = 1; section <= 8; section++) {
+                html += `<tr><td>第${section}节</td>`;
+                for (let day = 1; day <= 5; day++) {
+                    const scheds = classSchedules.filter(s => s.dayOfWeek === day && s.startSection <= section && s.endSection >= section);
+                    if (scheds.length) { html += `<td>${scheds.map(sch => { const c = courseMap[sch.courseId] || {}; const t = teacherMap[sch.teacherId] || {}; const r = classroomMap[sch.classroomId] || {}; return `<div class="schedule-cell"><div class="course-name">${sch.courseName || c.name || sch.courseId}</div><div class="teacher-name">👨‍🏫 ${t.name || sch.teacherId}</div><div class="classroom">📍 ${r.name || sch.classroomId}</div></div>`; }).join('')}</td>`; }
+                    else { html += `<td></td>`; }
+                }
+                html += `</tr>`;
+            }
+            html += `</tbody></table></div></div>`;
+            container.innerHTML = html;
+        }
+
+        function renderCourses(courses) {
+            if (!courses.length) return document.getElementById('coursesTable').innerHTML = '<div class="empty-state"><i class="fas fa-book-open"></i><p>暂无课程</p></div>';
+            document.getElementById('coursesTable').innerHTML = `<table class="data-table"><thead><tr><th>课程编号</th><th>课程名称</th><th>分类</th><th>学分</th><th>标签</th><th>操作</th></tr></thead><tbody>${courses.map(c => `<tr><td>${c.id}</td><td>${c.name}</td><td>${c.category}</td><td>${c.credits}</td><td>${(c.tags||[]).map(t=>`<span class="tag ${t==='必修'?'required':'elective'}">${t}</span>`).join('')}</td><td class="action-btns"><button class="btn btn-warning btn-sm" onclick="editCourse('${c.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteCourse('${c.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table>`;
+        }
+
+        function renderTeachers(teachers) {
+            if (!teachers.length) return document.getElementById('teachersTable').innerHTML = '<div class="empty-state"><i class="fas fa-chalkboard-teacher"></i><p>暂无教师</p></div>';
+            document.getElementById('teachersTable').innerHTML = `<table class="data-table"><thead><tr><th>工号</th><th>姓名</th><th>性别</th><th>科目</th><th>最大课时</th><th>操作</th></tr></thead><tbody>${teachers.map(t => `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.gender}</td><td>${t.subject}</td><td>${t.maxHours}</td><td class="action-btns"><button class="btn btn-warning btn-sm" onclick="editTeacher('${t.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteTeacher('${t.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table>`;
+        }
+
+        function renderStudents(students) {
+            if (!students.length) return document.getElementById('studentsTable').innerHTML = '<div class="empty-state"><i class="fas fa-user-graduate"></i><p>暂无学生</p></div>';
+            document.getElementById('studentsTable').innerHTML = `<table class="data-table"><thead><tr><th>学号</th><th>姓名</th><th>性别</th><th>年级</th><th>专业</th><th>班级</th><th>操作</th></tr></thead><tbody>${students.map(s => `<tr><td>${s.id}</td><td class="student-name">${s.name}</td><td>${s.gender}</td><td>${s.grade}</td><td>${s.major}</td><td>${s.class}</td><td class="action-btns"><button class="btn btn-warning btn-sm" onclick="editStudent('${s.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table>`;
+        }
+
+        function renderClassrooms(classrooms) {
+            if (!classrooms.length) return document.getElementById('classroomsTable').innerHTML = '<div class="empty-state"><i class="fas fa-door-open"></i><p>暂无教室</p></div>';
+            document.getElementById('classroomsTable').innerHTML = `<table class="data-table"><thead><tr><th>编号</th><th>名称</th><th>容量</th><th>教学楼</th><th>类型</th><th>操作</th></tr></thead><tbody>${classrooms.map(r => `<tr><td>${r.id}</td><td>${r.name}</td><td>${r.capacity}</td><td>${r.building}</td><td>${r.type}</td><td class="action-btns"><button class="btn btn-warning btn-sm" onclick="editClassroom('${r.id}')"><i class="fas fa-edit"></i></button><button class="btn btn-danger btn-sm" onclick="deleteClassroom('${r.id}')"><i class="fas fa-trash"></i></button></td></tr>`).join('')}</tbody></table>`;
+        }
+
+        function openModal(html) { document.getElementById('modalContent').innerHTML = html; document.getElementById('modalOverlay').classList.add('active'); }
+        function closeModal(e) { if (e.target.id === 'modalOverlay') document.getElementById('modalOverlay').classList.remove('active'); }
+
+        function openCourseModal(course = null) {
+            const isEdit = !!course;
+            openModal(`<h2>${isEdit ? '编辑课程' : '添加课程'}</h2><form onsubmit="saveCourse(event, '${course?.id || ''}')">
+                <div class="form-group"><label>课程编号</label><input type="text" name="id" value="${course?.id || ''}" ${isEdit?'readonly':''} required></div>
+                <div class="form-group"><label>课程名称</label><input type="text" name="name" value="${course?.name || ''}" required></div>
+                <div class="form-row"><div class="form-group"><label>分类</label><select name="category" required><option value="计算机" ${course?.category==='计算机'?'selected':''}>计算机</option><option value="数学" ${course?.category==='数学'?'selected':''}>数学</option><option value="物理" ${course?.category==='物理'?'selected':''}>物理</option><option value="英语" ${course?.category==='英语'?'selected':''}>英语</option></select></div><div class="form-group"><label>学分</label><input type="number" name="credits" value="${course?.credits||3}" min="1" max="10" required></div></div>
+                <div class="form-group"><label>最大学生数</label><input type="number" name="maxStudents" value="${course?.maxStudents||60}" min="1" required></div>
+                <div class="form-group"><label>标签</label><select name="tags" multiple size="2"><option value="必修" ${course?.tags?.includes('必修')?'selected':''}>必修</option><option value="选修" ${course?.tags?.includes('选修')?'selected':''}>选修</option></select></div>
+                <div class="modal-actions"><button type="button" class="btn btn-danger" onclick="document.getElementById('modalOverlay').classList.remove('active')">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>`);
+        }
+
+        function openTeacherModal(teacher = null) {
+            const isEdit = !!teacher;
+            openModal(`<h2>${isEdit ? '编辑教师' : '添加教师'}</h2><form onsubmit="saveTeacher(event, '${teacher?.id || ''}')">
+                <div class="form-group"><label>工号</label><input type="text" name="id" value="${teacher?.id||''}" ${isEdit?'readonly':''} required></div>
+                <div class="form-group"><label>姓名</label><input type="text" name="name" value="${teacher?.name||''}" required></div>
+                <div class="form-row"><div class="form-group"><label>性别</label><select name="gender" required><option value="男" ${teacher?.gender==='男'?'selected':''}>男</option><option value="女" ${teacher?.gender==='女'?'selected':''}>女</option></select></div><div class="form-group"><label>科目</label><select name="subject" required><option value="计算机" ${teacher?.subject==='计算机'?'selected':''}>计算机</option><option value="数学" ${teacher?.subject==='数学'?'selected':''}>数学</option><option value="物理" ${teacher?.subject==='物理'?'selected':''}>物理</option><option value="英语" ${teacher?.subject==='英语'?'selected':''}>英语</option></select></div></div>
+                <div class="form-group"><label>最大课时</label><input type="number" name="maxHours" value="${teacher?.maxHours||16}" min="1" max="30" required></div>
+                <div class="modal-actions"><button type="button" class="btn btn-danger" onclick="document.getElementById('modalOverlay').classList.remove('active')">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>`);
+        }
+
+        function openStudentModal(student = null) {
+            const isEdit = !!student;
+            openModal(`<h2>${isEdit ? '编辑学生' : '添加学生'}</h2><form onsubmit="saveStudent(event, '${student?.id || ''}')">
+                <div class="form-group"><label>学号</label><input type="text" name="id" value="${student?.id||''}" ${isEdit?'readonly':''} required></div>
+                <div class="form-group"><label>姓名</label><input type="text" name="name" value="${student?.name||''}" required></div>
+                <div class="form-row"><div class="form-group"><label>性别</label><select name="gender" required><option value="男" ${student?.gender==='男'?'selected':''}>男</option><option value="女" ${student?.gender==='女'?'selected':''}>女</option></select></div><div class="form-group"><label>年级</label><select name="grade" required><option value="大一" ${student?.grade==='大一'?'selected':''}>大一</option><option value="大二" ${student?.grade==='大二'?'selected':''}>大二</option></select></div></div>
+                <div class="form-row"><div class="form-group"><label>专业</label><input type="text" name="major" value="${student?.major||''}" required></div><div class="form-group"><label>班级</label><input type="text" name="class" value="${student?.class||''}" required></div></div>
+                <div class="modal-actions"><button type="button" class="btn btn-danger" onclick="document.getElementById('modalOverlay').classList.remove('active')">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>`);
+        }
+
+        function openClassroomModal(classroom = null) {
+            const isEdit = !!classroom;
+            openModal(`<h2>${isEdit ? '编辑教室' : '添加教室'}</h2><form onsubmit="saveClassroom(event, '${classroom?.id || ''}')">
+                <div class="form-group"><label>教室编号</label><input type="text" name="id" value="${classroom?.id||''}" ${isEdit?'readonly':''} required></div>
+                <div class="form-group"><label>教室名称</label><input type="text" name="name" value="${classroom?.name||''}" required></div>
+                <div class="form-row"><div class="form-group"><label>容量</label><input type="number" name="capacity" value="${classroom?.capacity||60}" min="1" required></div><div class="form-group"><label>教学楼</label><select name="building" required><option value="教学楼A" ${classroom?.building==='教学楼A'?'selected':''}>教学楼A</option><option value="教学楼B" ${classroom?.building==='教学楼B'?'selected':''}>教学楼B</option></select></div></div>
+                <div class="form-group"><label>类型</label><select name="type" required><option value="多媒体教室" ${classroom?.type==='多媒体教室'?'selected':''}>多媒体教室</option><option value="普通教室" ${classroom?.type==='普通教室'?'selected':''}>普通教室</option><option value="实验室" ${classroom?.type==='实验室'?'selected':''}>实验室</option></select></div>
+                <div class="modal-actions"><button type="button" class="btn btn-danger" onclick="document.getElementById('modalOverlay').classList.remove('active')">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>`);
+        }
+
+        async function openScheduleModal() {
+            // 直接从API获取最新数据
+            const [courses, teachers, classrooms, classes] = await Promise.all([
+                fetch(`${API}/courses`).then(r => r.json()),
+                fetch(`${API}/teachers`).then(r => r.json()),
+                fetch(`${API}/classrooms`).then(r => r.json()),
+                fetch(`${API}/classes`).then(r => r.json())
+            ]);
+            const courseOptions = courses.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            const teacherOptions = teachers.map(t => `<option value="${t.id}">${t.name} - ${t.subject}</option>`).join('');
+            const classroomOptions = classrooms.map(r => `<option value="${r.id}">${r.name} (${r.building}, ${r.capacity}人)</option>`).join('');
+            const classOptions = classes.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+            openModal(`<h2>手动排课</h2><form onsubmit="saveSchedule(event)">
+                <div class="form-group"><label>选择课程 *</label><select name="courseId" required>${courseOptions}</select></div>
+                <div class="form-group"><label>选择教师 *</label><select name="teacherId" required>${teacherOptions}</select></div>
+                <div class="form-group"><label>选择班级 *</label><select name="classId" required>${classOptions}</select></div>
+                <div class="form-group"><label>选择教室 *</label><select name="classroomId" required>${classroomOptions}</select></div>
+                <div class="form-row"><div class="form-group"><label>星期</label><select name="dayOfWeek" required><option value="1">周一</option><option value="2">周二</option><option value="3">周三</option><option value="4">周四</option><option value="5">周五</option></select></div><div class="form-group"><label>周次</label><input type="text" name="weeks" value="1-16" placeholder="如: 1-16"></div></div>
+                <div class="form-row"><div class="form-group"><label>开始节次 (1-8)</label><input type="number" name="startSection" value="1" min="1" max="8" required></div><div class="form-group"><label>结束节次 (1-8)</label><input type="number" name="endSection" value="2" min="1" max="8" required></div></div>
+                <div class="modal-actions"><button type="button" class="btn btn-danger" onclick="document.getElementById('modalOverlay').classList.remove('active')">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>`);
+        }
+
+        async function saveCourse(e, id) { e.preventDefault(); const form = e.target; const data = { id: form.id.value, name: form.name.value, category: form.category.value, credits: parseInt(form.credits.value), maxStudents: parseInt(form.maxStudents.value), tags: Array.from(form.tags.selectedOptions).map(o => o.value) }; try { await fetch(id ? `${API}/courses/${id}` : `${API}/courses`, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); showToast(id ? '课程已更新' : '课程已添加', 'success'); closeModal({target:{id:'modalOverlay'}}); loadCourses(); loadStats(); } catch(e) { showToast('保存失败', 'error'); } }
+        async function saveTeacher(e, id) { e.preventDefault(); const form = e.target; const data = { id: form.id.value, name: form.name.value, gender: form.gender.value, subject: form.subject.value, maxHours: parseInt(form.maxHours.value) }; try { await fetch(id ? `${API}/teachers/${id}` : `${API}/teachers`, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); showToast(id ? '教师已更新' : '教师已添加', 'success'); closeModal({target:{id:'modalOverlay'}}); loadTeachers(); loadStats(); } catch(e) { showToast('保存失败', 'error'); } }
+        async function saveStudent(e, id) { e.preventDefault(); const form = e.target; const data = { id: form.id.value, name: form.name.value, gender: form.gender.value, grade: form.grade.value, major: form.major.value, class: form.class.value }; try { await fetch(id ? `${API}/students/${id}` : `${API}/students`, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); showToast(id ? '学生已更新' : '学生已添加', 'success'); closeModal({target:{id:'modalOverlay'}}); loadStudents(); loadStats(); } catch(e) { showToast('保存失败', 'error'); } }
+        async function saveClassroom(e, id) { e.preventDefault(); const form = e.target; const data = { id: form.id.value, name: form.name.value, capacity: parseInt(form.capacity.value), building: form.building.value, type: form.type.value, equipment: ['投影仪', '电脑', '音响'] }; try { await fetch(id ? `${API}/classrooms/${id}` : `${API}/classrooms`, { method: id ? 'PUT' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); showToast(id ? '教室已更新' : '教室已添加', 'success'); closeModal({target:{id:'modalOverlay'}}); loadClassrooms(); loadStats(); } catch(e) { showToast('保存失败', 'error'); } }
+        async function saveSchedule(e) { e.preventDefault(); const form = e.target; if (parseInt(form.startSection.value) > parseInt(form.endSection.value)) { showToast('开始节次不能大于结束节次', 'error'); return; } const data = { courseId: form.courseId.value, teacherId: form.teacherId.value, classroomId: form.classroomId.value, classId: form.classId.value, dayOfWeek: parseInt(form.dayOfWeek.value), startSection: parseInt(form.startSection.value), endSection: parseInt(form.endSection.value), weeks: form.weeks.value || '1-16' }; try { await fetch(`${API}/schedules`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) }); showToast('排课已添加', 'success'); closeModal({target:{id:'modalOverlay'}}); loadSchedule(); loadStats(); // 刷新老师课表 const selectedTeacher = document.getElementById('teacherScheduleSelect').value; if (selectedTeacher) filterScheduleByTeacher(); // 刷新班级课表 const selectedClass = document.getElementById('studentSelect').value; if (selectedClass) loadStudentSchedule(); } catch(e) { showToast('保存失败', 'error'); } }
+        async function deleteCourse(id) { if (!confirm('确定删除？')) return; await fetch(`${API}/courses/${id}`, {method:'DELETE'}); showToast('已删除','success'); loadCourses(); loadStats(); }
+        async function deleteTeacher(id) { if (!confirm('确定删除？')) return; await fetch(`${API}/teachers/${id}`, {method:'DELETE'}); showToast('已删除','success'); loadTeachers(); loadStats(); }
+        async function deleteStudent(id) { if (!confirm('确定删除？')) return; await fetch(`${API}/students/${id}`, {method:'DELETE'}); showToast('已删除','success'); loadStudents(); loadStats(); }
+        async function deleteClassroom(id) { if (!confirm('确定删除？')) return; await fetch(`${API}/classrooms/${id}`, {method:'DELETE'}); showToast('已删除','success'); loadClassrooms(); loadStats(); }
+        async function autoSchedule() { showToast('智能排课中...', 'warning'); try { const res = await fetch(`${API}/schedules/auto`, { method: 'POST' }); const data = await res.json(); showToast(`成功排课 ${data.added} 门`, 'success'); loadSchedule(); loadStats(); // 刷新老师课表 const selectedTeacher = document.getElementById('teacherScheduleSelect').value; if (selectedTeacher) filterScheduleByTeacher(); // 刷新班级课表 const selectedClass = document.getElementById('studentSelect').value; if (selectedClass) loadStudentSchedule(); } catch(e) { showToast('智能排课失败', 'error'); } }
+        async function clearSchedule() { if (!confirm('确定要清空所有排课吗？')) return; try { await fetch(`${API}/schedules`, { method: 'DELETE' }); showToast('排课已清空', 'success'); loadSchedule(); loadStats(); } catch(e) { showToast('清空失败', 'error'); } }
+        function editCourse(id) { const c = currentData.courses.find(x => x.id === id); openCourseModal(c); }
+        function editTeacher(id) { const t = currentData.teachers.find(x => x.id === id); openTeacherModal(t); }
+        function editStudent(id) { const s = currentData.students.find(x => x.id === id); openStudentModal(s); }
+        function editClassroom(id) { const r = currentData.classrooms.find(x => x.id === id); openClassroomModal(r); }
+        function setupSearch() {
+            document.getElementById('courseSearch')?.addEventListener('input', e => renderCourses(currentData.courses.filter(c => c.name.toLowerCase().includes(e.target.value.toLowerCase()) || c.id.toLowerCase().includes(e.target.value.toLowerCase()))));
+            document.getElementById('teacherSearch')?.addEventListener('input', e => renderTeachers(currentData.teachers.filter(t => t.name.toLowerCase().includes(e.target.value.toLowerCase()) || t.id.toLowerCase().includes(e.target.value.toLowerCase()))));
+            document.getElementById('studentSearch')?.addEventListener('input', e => renderStudents(currentData.students.filter(s => s.name.toLowerCase().includes(e.target.value.toLowerCase()) || s.id.toLowerCase().includes(e.target.value.toLowerCase()))));
+            document.getElementById('classroomSearch')?.addEventListener('input', e => renderClassrooms(currentData.classrooms.filter(r => r.name.toLowerCase().includes(e.target.value.toLowerCase()) || r.id.toLowerCase().includes(e.target.value.toLowerCase()))));
+        }
+        function showToast(message, type = 'success') { const toast = document.getElementById('toast'); toast.textContent = message; toast.className = `toast ${type} show`; setTimeout(() => toast.classList.remove('show'), 3000); }
+    </script>
+</body>
+</html>

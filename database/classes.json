@@ -1,0 +1,30 @@
+[
+  {
+    "id": "C001",
+    "name": "计科22-1班",
+    "major": "计算机科学与技术",
+    "grade": "大二",
+    "studentCount": 30
+  },
+  {
+    "id": "C002",
+    "name": "计科22-2班",
+    "major": "计算机科学与技术",
+    "grade": "大二",
+    "studentCount": 30
+  },
+  {
+    "id": "C003",
+    "name": "软工22-1班",
+    "major": "软件工程",
+    "grade": "大二",
+    "studentCount": 30
+  },
+  {
+    "id": "C004",
+    "name": "数学22-1班",
+    "major": "数学与应用数学",
+    "grade": "大二",
+    "studentCount": 30
+  }
+]

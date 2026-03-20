@@ -1,0 +1,84 @@
+# GitHub Actions 构建 APK 配置
+
+这是 FineCourse 的 GitHub Actions 工作流配置。
+
+## 📝 配置说明
+
+这个 `.yml` 文件定义了当推送代码到 GitHub 时，自动构建 APK 的流程。
+
+### 构建流程：
+
+1. ** checkout 代码** - 拉取仓库代码
+2. **安装 Node.js** - 用于运行 Capacitor
+3. **安装依赖** - `npm ci` 安装前端依赖
+4. **安装 Capacitor CLI** - 用于同步 Android 项目
+5. **安装 JDK** - Android 构建需要 Java 17
+6. **构建 APK** - `./gradlew assembleDebug`
+7. **上传 APK** - 作为工作流产物（保存 7 天）
+
+---
+
+## 🎯 使用方式
+
+### 方式 1：推送到 GitHub 自动构建
+
+```bash
+git push origin main
+```
+
+推送后，Actions 会自动触发构建。
+
+---
+
+### 方式 2：手动触发构建
+
+1. 访问：`https://github.com/<用户名>/<仓库>/actions`
+2. 点击 **"Build APK"**
+3. 点击 **"Run workflow"**
+4. 选择分支（main）
+5. 点击 **"Run workflow"**
+
+---
+
+## 📦 输出
+
+构建成功后，APK 会作为 artifact 上传：
+
+- **名称**: FineCourse-APK
+- **位置**: `frontend/android/app/build/outputs/apk/debug/app-debug.apk`
+- **有效期**: 7 天
+
+---
+
+## 🔧 自定义
+
+如果需要修改构建配置，编辑这个文件：
+
+- 修改 `java-version`: 17 → 其他版本
+- 修改 `retention-days`: 7 → 更长/更短
+- 添加签名配置（需要 secrets）
+
+---
+
+## ⚠️ 常见问题
+
+### 构建失败？
+
+- 检查 `frontend/www/` 是否包含必要文件
+- 查看 Actions 日志了解具体错误
+
+### APK 太大？
+
+- 可以在 `build.gradle` 中启用 ProGuard 混淆压缩
+
+### 需要签名？
+
+- 添加 secrets: `KEYSTORE_FILE`, `KEYSTORE_PASSWORD`, `KEYSTORE_ALIAS`, `KEYSTORE_ALIAS_PASSWORD`
+
+---
+
+## 📱 配置信息
+
+- **App ID**: com.finecourse.app
+- **App Name**: FineCourse
+- **端口**: 8080 (前端), 3001 (API)

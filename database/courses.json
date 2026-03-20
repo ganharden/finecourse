@@ -1,0 +1,325 @@
+[
+  {
+    "id": "CS101",
+    "name": "数据结构与算法",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 60,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "介绍常见数据结构与算法设计方法"
+  },
+  {
+    "id": "CS102",
+    "name": "计算机组成原理",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 50,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "计算机硬件组成与工作原理"
+  },
+  {
+    "id": "CS103",
+    "name": "操作系统",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 55,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "操作系统原理与实践"
+  },
+  {
+    "id": "CS104",
+    "name": "计算机网络",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 40,
+    "maxStudents": 60,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "网络协议与体系结构"
+  },
+  {
+    "id": "CS105",
+    "name": "数据库系统",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 44,
+    "maxStudents": 50,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "关系数据库理论与实践"
+  },
+  {
+    "id": "CS106",
+    "name": "软件工程",
+    "category": "计算机",
+    "credits": 2,
+    "hours": 32,
+    "maxStudents": 45,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "软件开发方法学"
+  },
+  {
+    "id": "CS201",
+    "name": "人工智能导论",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 40,
+    "maxStudents": 40,
+    "tags": [
+      "选修",
+      "前沿"
+    ],
+    "description": "AI基础理论与应用"
+  },
+  {
+    "id": "CS202",
+    "name": "机器学习",
+    "category": "计算机",
+    "credits": 3,
+    "hours": 44,
+    "maxStudents": 35,
+    "tags": [
+      "选修",
+      "前沿"
+    ],
+    "description": "机器学习算法与应用"
+  },
+  {
+    "id": "CS203",
+    "name": "Web开发技术",
+    "category": "计算机",
+    "credits": 2,
+    "hours": 32,
+    "maxStudents": 50,
+    "tags": [
+      "选修",
+      "实践"
+    ],
+    "description": "现代Web前端开发"
+  },
+  {
+    "id": "CS204",
+    "name": "移动应用开发",
+    "category": "计算机",
+    "credits": 2,
+    "hours": 32,
+    "maxStudents": 40,
+    "tags": [
+      "选修",
+      "实践"
+    ],
+    "description": "iOS与Android开发"
+  },
+  {
+    "id": "MATH101",
+    "name": "高等数学A(Ⅰ)",
+    "category": "数学",
+    "credits": 4,
+    "hours": 64,
+    "maxStudents": 80,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "微积分与极限理论"
+  },
+  {
+    "id": "MATH102",
+    "name": "高等数学A(Ⅱ)",
+    "category": "数学",
+    "credits": 4,
+    "hours": 64,
+    "maxStudents": 75,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "多元函数微积分"
+  },
+  {
+    "id": "MATH201",
+    "name": "线性代数",
+    "category": "数学",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 70,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "矩阵与向量空间"
+  },
+  {
+    "id": "MATH202",
+    "name": "概率论与数理统计",
+    "category": "数学",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 60,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "概率论基础与统计分析"
+  },
+  {
+    "id": "PHY101",
+    "name": "大学物理A(Ⅰ)",
+    "category": "物理",
+    "credits": 4,
+    "hours": 56,
+    "maxStudents": 70,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "力学与热学"
+  },
+  {
+    "id": "PHY102",
+    "name": "大学物理A(Ⅱ)",
+    "category": "物理",
+    "credits": 4,
+    "hours": 56,
+    "maxStudents": 65,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "电磁学与光学"
+  },
+  {
+    "id": "PHY201",
+    "name": "物理实验Ⅰ",
+    "category": "物理",
+    "credits": 1,
+    "hours": 16,
+    "maxStudents": 30,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "基础物理实验"
+  },
+  {
+    "id": "ENG101",
+    "name": "大学英语(一)",
+    "category": "英语",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 40,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "大学英语综合教程1"
+  },
+  {
+    "id": "ENG102",
+    "name": "大学英语(二)",
+    "category": "英语",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 40,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "大学英语综合教程2"
+  },
+  {
+    "id": "ENG201",
+    "name": "学术英语写作",
+    "category": "英语",
+    "credits": 2,
+    "hours": 32,
+    "maxStudents": 35,
+    "tags": [
+      "选修"
+    ],
+    "description": "学术论文写作技巧"
+  },
+  {
+    "id": "POL101",
+    "name": "思想道德与法治",
+    "category": "政治",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 100,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "思想政治理论"
+  },
+  {
+    "id": "POL102",
+    "name": "中国近现代史纲要",
+    "category": "政治",
+    "credits": 3,
+    "hours": 40,
+    "maxStudents": 90,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "中国近现代历史"
+  },
+  {
+    "id": "HIST101",
+    "name": "大学语文",
+    "category": "文科",
+    "credits": 2,
+    "hours": 32,
+    "maxStudents": 50,
+    "tags": [
+      "通识",
+      "必修"
+    ],
+    "description": "经典文学作品导读"
+  },
+  {
+    "id": "ECON101",
+    "name": "微观经济学",
+    "category": "文科",
+    "credits": 3,
+    "hours": 48,
+    "maxStudents": 60,
+    "tags": [
+      "选修"
+    ],
+    "description": "消费者与生产者行为"
+  },
+  {
+    "id": "PE101",
+    "name": "体育(一)",
+    "category": "体育",
+    "credits": 1,
+    "hours": 32,
+    "maxStudents": 30,
+    "tags": [
+      "核心",
+      "必修"
+    ],
+    "description": "体育基础课程"
+  }
+]

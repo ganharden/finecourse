@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>FineCourse - 课程管理系统</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- PWA Meta Tags -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#1e3a5f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:'Microsoft YaHei',sans-serif}
+        body{background:#f5f7fa;color:#333;display:flex;min-height:100vh}
+        .sidebar{width:220px;background:#1e3a5f;color:#fff;padding:20px 0;position:fixed;height:100%}
+        .sidebar .logo{text-align:center;padding:20px;font-size:20px;font-weight:bold;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:20px}
+        .sidebar .nav-item{padding:14px 25px;cursor:pointer;transition:0.2s;display:flex;align-items:center}
+        .sidebar .nav-item:hover,.sidebar .nav-item.active{background:rgba(255,255,255,0.1)}
+        .sidebar .nav-item i{width:25px;margin-right:12px}
+        .main{flex:1;margin-left:220px;padding:20px}
+        .header{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#fff;border-radius:10px;margin-bottom:20px;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+        .header h1{font-size:22px;color:#1e3a5f}
+        .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:30px}
+        .stat-card{background:#fff;border-radius:10px;padding:20px;box-shadow:0 2px 10px rgba(0,0,0,0.1);cursor:pointer;transition:0.2s}
+        .stat-card:hover{transform:translateY(-3px);box-shadow:0 5px 20px rgba(0,0,0,0.15)}
+        .stat-card .icon{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:10px}
+        .stat-card .icon.courses{background:#e3f2fd;color:#1976d2}
+        .stat-card .icon.teachers{background:#e8f5e9;color:#388e3c}
+        .stat-card .icon.students{background:#fff3e0;color:#f57c00}
+        .stat-card .icon.classrooms{background:#f3e5f5;color:#7b1fa2}
+        .stat-card .value{font-size:28px;font-weight:bold;color:#333}
+        .stat-card .label{color:#666;font-size:14px}
+        .section{display:none}
+        .section.active{display:block}
+        .toolbar{display:flex;justify-content:space-between;margin-bottom:20px;align-items:center}
+        .toolbar select,.toolbar input{padding:10px 15px;border:1px solid #ddd;border-radius:8px}
+        .toolbar input{width:200px}
+        .btn{padding:10px 20px;border:none;border-radius:8px;cursor:pointer;font-size:14px;transition:0.2s}
+        .btn:hover{transform:translateY(-1px)}
+        .btn-primary{background:#1976d2;color:#fff}
+        .btn-success{background:#388e3c;color:#fff}
+        .btn-danger{background:#d32f2f;color:#fff}
+        .btn-sm{padding:6px 12px;font-size:12px}
+        .btn-warning{background:#f57c00;color:#fff}
+        .chat-container{background:#fff;border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.1);display:flex;flex-direction:column;height:calc(100vh - 180px);overflow:hidden}
+        .chat-header{padding:15px 20px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;display:flex;align-items:center;gap:10px}
+        .chat-header i{font-size:24px}
+        .chat-header h3{margin:0;font-size:18px}
+        .chat-messages{flex:1;padding:20px;overflow-y:auto;background:#f8f9fa}
+        .chat-message{margin-bottom:15px;display:flex;gap:10px;animation:fadeIn 0.3s ease}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+        .chat-message.user{flex-direction:row-reverse}
+        .chat-avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+        .chat-message.ai .chat-avatar{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff}
+        .chat-message.user .chat-avatar{background:#1976d2;color:#fff}
+        .chat-bubble{max-width:70%;padding:12px 16px;border-radius:18px;font-size:14px;line-height:1.5;word-wrap:break-word}
+        .chat-message.ai .chat-bubble{background:#fff;border:1px solid #e0e0e0;border-bottom-left-radius:4px;color:#333}
+        .chat-message.user .chat-bubble{background:#1976d2;color:#fff;border-bottom-right-radius:4px}
+        .chat-input-area{padding:15px 20px;background:#fff;border-top:1px solid #eee;display:flex;gap:10px}
+        .chat-input{flex:1;padding:12px 16px;border:1px solid #ddd;border-radius:25px;font-size:14px;outline:none;transition:0.2s}
+        .chat-input:focus{border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,0.1)}
+        .chat-send-btn{width:45px;height:45px;border-radius:50%;border:none;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:0.2s}
+        .chat-send-btn:hover{transform:scale(1.05)}
+        .chat-send-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .chat-action-btns{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+        .chat-action-btn{padding:6px 12px;border:1px solid #667eea;background:#fff;color:#667eea;border-radius:15px;font-size:12px;cursor:pointer;transition:0.2s}
+        .chat-action-btn:hover{background:#667eea;color:#fff}
+        .chat-confirm-box{background:#fff3e0;border:1px solid #ffb74d;border-radius:8px;padding:12px;margin-top:10px}
+        .chat-confirm-btns{display:flex;gap:10px;margin-top:10px}
+        .typing-indicator{display:flex;gap:4px;padding:12px 16px}
+        .typing-indicator span{width:8px;height:8px;background:#667eea;border-radius:50%;animation:typing 1.4s infinite}
+        .typing-indicator span:nth-child(2){animation-delay:0.2s}
+        .typing-indicator span:nth-child(3){animation-delay:0.4s}
+        @keyframes typing{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-10px)}}
+        .schedule-table{width:100%;background:#fff;border-collapse:collapse;border-radius:10px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.1)}
+        .schedule-table th,.schedule-table td{padding:15px;text-align:center;border:1px solid #eee;height:60px}
+        .schedule-table th{background:#e3f2fd;color:#1976d2}
+        .schedule-table td.empty-cell{background:#fafafa}
+        .schedule-cell{padding:8px;background:#e3f2fd;border-radius:6px;margin:2px;font-size:12px;min-height:50px;display:flex;flex-direction:column;justify-content:center}
+        .schedule-cell .course{color:#1976d2;font-weight:bold}
+        .schedule-cell .room{color:#666}
+        .schedule-cell .cls{color:#d32f2f}
+        .empty{text-align:center;padding:40px;color:#999}
+        .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:1000;align-items:center;justify-content:center}
+        .modal.active{display:flex}
+        .modal-content{background:#fff;border-radius:12px;padding:25px;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+        .modal h2{margin-bottom:20px;color:#1e3a5f;display:flex;justify-content:space-between;align-items:center}
+        .modal h2 button{background:none;border:none;font-size:20px;cursor:pointer;color:#999}
+        .form-group{margin-bottom:15px}
+        .form-group label{display:block;margin-bottom:5px;color:#666}
+        .form-group input,.form-group select{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+        .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px}
+        .action-btns{display:flex;gap:5px;justify-content:center}
+        .detail-list{max-height:400px;overflow-y:auto}
+        .detail-item{padding:12px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+        .detail-item:hover{background:#f9f9f9}
+        .detail-item .info{flex:1}
+        .detail-item .name{font-weight:bold;color:#333}
+        .detail-item .desc{font-size:12px;color:#666}
+        .detail-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px}
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo"><i class="fas fa-graduation-cap"></i> FineCourse</div>
+        <div class="nav-item active" data-section="dashboard"><i class="fas fa-chart-pie"></i> 仪表盘</div>
+        <div class="nav-item" data-section="courses"><i class="fas fa-book"></i> 课程管理</div>
+        <div class="nav-item" data-section="teachers"><i class="fas fa-chalkboard-teacher"></i> 教师管理</div>
+        <div class="nav-item" data-section="students"><i class="fas fa-user-graduate"></i> 学生管理</div>
+        <div class="nav-item" data-section="classrooms"><i class="fas fa-door-open"></i> 教室管理</div>
+        <div class="nav-item" data-section="schedule"><i class="fas fa-calendar-alt"></i> 排课管理</div>
+        <div class="nav-item" data-section="my-schedule"><i class="fas fa-user-clock"></i> 我的课表</div>
+        <div class="nav-item" data-section="ai-assistant"><i class="fas fa-robot"></i> AI 助手</div>
+    </div>
+    <div class="main">
+        <div class="header">
+            <h1 id="pageTitle">仪表盘</h1>
+            <div id="currentTime"></div>
+        </div>
+        <div class="section active" id="dashboard">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="showDetail('courses')">
+                    <div class="icon courses"><i class="fas fa-book"></i></div>
+                    <div class="value" id="statCourses">-</div>
+                    <div class="label">课程总数</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('teachers')">
+                    <div class="icon teachers"><i class="fas fa-chalkboard-teacher"></i></div>
+                    <div class="value" id="statTeachers">-</div>
+                    <div class="label">教师总数</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('students')">
+                    <div class="icon students"><i class="fas fa-user-graduate"></i></div>
+                    <div class="value" id="statStudents">-</div>
+                    <div class="label">学生总数</div>
+                </div>
+                <div class="stat-card" onclick="showDetail('classrooms')">
+                    <div class="icon classrooms"><i class="fas fa-door-open"></i></div>
+                    <div class="value" id="statClassrooms">-</div>
+                    <div class="label">教室总数</div>
+                </div>
+            </div>
+            <div id="dashboardDetail"></div>
+        </div>
+        <div class="section" id="courses">
+            <div class="toolbar">
+                <input type="text" id="courseSearch" placeholder="搜索课程..." oninput="renderCourses()">
+                <button class="btn btn-primary" onclick="openCourseModal()">+ 添加课程</button>
+            </div>
+            <div id="coursesList"></div>
+        </div>
+        <div class="section" id="teachers">
+            <div class="toolbar">
+                <input type="text" id="teacherSearch" placeholder="搜索教师..." oninput="renderTeachers()">
+                <button class="btn btn-primary" onclick="openTeacherModal()">+ 添加教师</button>
+            </div>
+            <div id="teachersList"></div>
+        </div>
+        <div class="section" id="students">
+            <div class="toolbar">
+                <input type="text" id="studentSearch" placeholder="搜索学生..." oninput="renderStudents()">
+                <button class="btn btn-primary" onclick="openStudentModal()">+ 添加学生</button>
+            </div>
+            <div id="studentsList"></div>
+        </div>
+        <div class="section" id="classrooms">
+            <div class="toolbar">
+                <input type="text" id="classroomSearch" placeholder="搜索教室..." oninput="renderClassrooms()">
+                <button class="btn btn-primary" onclick="openClassroomModal()">+ 添加教室</button>
+            </div>
+            <div id="classroomsList"></div>
+        </div>
+        <div class="section" id="schedule">
+            <div class="toolbar">
+                <div style="display:flex;gap:10px;align-items:center">
+                    <select id="teacherSelect" onchange="loadTeacherSchedule()"><option value="">-- 请选择老师 --</option></select>
+                    <select id="weekSelect" onchange="loadTeacherSchedule()">
+                        <option value="all">全部周</option>
+                        <option value="1">第1周</option>
+                        <option value="2">第2周</option>
+                        <option value="3">第3周</option>
+                        <option value="4">第4周</option>
+                        <option value="5">第5周</option>
+                        <option value="6">第6周</option>
+                        <option value="7">第7周</option>
+                        <option value="8">第8周</option>
+                        <option value="9">第9周</option>
+                        <option value="10">第10周</option>
+                        <option value="11">第11周</option>
+                        <option value="12">第12周</option>
+                        <option value="13">第13周</option>
+                        <option value="14">第14周</option>
+                        <option value="15">第15周</option>
+                        <option value="16">第16周</option>
+                        <option value="17">第17周</option>
+                        <option value="18">第18周</option>
+                    </select>
+                </div>
+                <div>
+                    <button class="btn btn-primary" onclick="openScheduleModal()"><i class="fas fa-plus"></i> 手动排课</button>
+                    <button class="btn btn-success" onclick="openAutoScheduleModal()"><i class="fas fa-magic"></i> 智能排课</button>
+                    <button class="btn btn-danger" onclick="clearSchedule()"><i class="fas fa-trash"></i> 清空</button>
+                </div>
+            </div>
+            <div id="scheduleView"></div>
+        </div>
+        <div class="section" id="my-schedule">
+            <div class="toolbar">
+                <div style="display:flex;gap:10px;align-items:center">
+                    <select id="classSelect" onchange="loadClassSchedule()"><option value="">-- 请选择班级 --</option></select>
+                    <select id="classWeekSelect" onchange="loadClassSchedule()">
+                        <option value="all">全部周</option>
+                        <option value="1">第1周</option>
+                        <option value="2">第2周</option>
+                        <option value="3">第3周</option>
+                        <option value="4">第4周</option>
+                        <option value="5">第5周</option>
+                        <option value="6">第6周</option>
+                        <option value="7">第7周</option>
+                        <option value="8">第8周</option>
+                        <option value="9">第9周</option>
+                        <option value="10">第10周</option>
+                        <option value="11">第11周</option>
+                        <option value="12">第12周</option>
+                        <option value="13">第13周</option>
+                        <option value="14">第14周</option>
+                        <option value="15">第15周</option>
+                        <option value="16">第16周</option>
+                        <option value="17">第17周</option>
+                        <option value="18">第18周</option>
+                    </select>
+                </div>
+            </div>
+            <div id="classScheduleView"></div>
+        </div>
+        <div class="section" id="ai-assistant">
+            <div class="chat-container">
+                <div class="chat-header">
+                    <i class="fas fa-robot"></i>
+                    <div>
+                        <h3>AI 排课助手</h3>
+                        <small>用自然语言管理你的课表</small>
+                    </div>
+                    <select id="modelSelector" class="model-selector" onchange="changeAIModel()" style="margin-left:auto;padding:5px 10px;border-radius:5px;border:none;background:rgba(255,255,255,0.2);color:#fff;cursor:pointer;">
+                        <option value="codingplan|qwen3-max-2026-01-23" style="color:#333;">排课-qwen3-max-2026-01-23</option>
+                        <option value="codingplan|kimi-k2.5" style="color:#333;">排课-Kimi K2.5</option>
+                        <option value="ollama|qwen3:4b" style="color:#333;">💻 本地 Ollama</option>
+                        <option value="openclaw|kimi-k2.5" style="color:#333;">🌐 OpenClaw</option>
+                    </select>
+                </div>
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-message ai">
+                        <div class="chat-avatar"><i class="fas fa-robot"></i></div>
+                        <div class="chat-bubble">
+                            你好！我是你的智能排课助手。你可以这样跟我说：<br><br>
+                            • "把张老师的课调到周五"<br>
+                            • "查询当前排课情况"<br>
+                            • "检查课程冲突"<br>
+                            • "帮我自动排课"
+                        </div>
+                    </div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" class="chat-input" id="chatInput" placeholder="输入消息..." onkeypress="if(event.key==='Enter')sendChatMessage()">
+                    <button class="chat-send-btn" id="chatSendBtn" onclick="sendChatMessage()">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal" id="modal" onclick="if(event.target.id==='modal')closeModal()">
+        <div class="modal-content" id="modalContent"></div>
+    </div>
+    <script>
+const API = 'http://localhost:3001/api';
+let data = {courses:[], teachers:[], students:[], classrooms:[], classes:[], schedules:[]};
+let currentEditId = null;
+
+function init(){
+    loadStats();
+    loadAllData();
+    initModelSelector();
+    setInterval(()=>document.getElementById('currentTime').textContent=new Date().toLocaleString('zh-CN'),1000);
+    document.querySelectorAll('.nav-item').forEach(item=>{
+        item.onclick=()=>{
+            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+            item.classList.add('active');
+            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+            document.getElementById(item.dataset.section).classList.add('active');
+            const titles={dashboard:'仪表盘',courses:'课程管理',teachers:'教师管理',students:'学生管理',classrooms:'教室管理',schedule:'排课管理','my-schedule':'我的课表','ai-assistant':'AI 助手'};
+            document.getElementById('pageTitle').textContent=titles[item.dataset.section];
+            loadSection(item.dataset.section);
+        }
+    });
+}
+
+async function loadAllData(){
+    data.courses=await fetch(API+'/courses').then(r=>r.json());
+    data.teachers=await fetch(API+'/teachers').then(r=>r.json());
+    data.students=await fetch(API+'/students').then(r=>r.json());
+    data.classrooms=await fetch(API+'/classrooms').then(r=>r.json());
+    data.classes=await fetch(API+'/classes').then(r=>r.json());
+    data.schedules=await fetch(API+'/schedules').then(r=>r.json());
+    document.getElementById('teacherSelect').innerHTML='<option value="">-- 请选择老师 --</option>'+data.teachers.map(t=>'<option value="'+t.id+'">'+t.name+' - '+t.subject+'</option>').join('');
+    document.getElementById('classSelect').innerHTML='<option value="">-- 请选择班级 --</option>'+data.classes.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');
+}
+
+async function loadSection(section){
+    if(section==='dashboard') loadStats();
+    else if(section==='courses') loadCourses();
+    else if(section==='teachers') loadTeachers();
+    else if(section==='students') loadStudents();
+    else if(section==='classrooms') loadClassrooms();
+    else if(section==='schedule') loadSchedule();
+    else if(section==='my-schedule') loadClasses();
+    else if(section==='ai-assistant') initChat();
+}
+
+async function loadStats(){
+    const r=await fetch(API+'/stats');
+    const d=await r.json();
+    document.getElementById('statCourses').textContent=d.courses;
+    document.getElementById('statTeachers').textContent=d.teachers;
+    document.getElementById('statStudents').textContent=d.students;
+    document.getElementById('statClassrooms').textContent=d.classrooms;
+}
+
+async function loadCourses(){
+    data.courses=await fetch(API+'/courses').then(r=>r.json());
+    renderCourses();
+}
+
+function renderCourses(){
+    const search=document.getElementById('courseSearch').value.toLowerCase();
+    const list=data.courses.filter(c=>c.name.toLowerCase().includes(search)||c.id.toLowerCase().includes(search));
+    let html='<table class="schedule-table"><thead><tr><th>ID</th><th>名称</th><th>类别</th><th>学分</th><th>最大人数</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(c=>{html+='<tr><td>'+c.id+'</td><td>'+c.name+'</td><td>'+c.category+'</td><td>'+c.credits+'</td><td>'+c.maxStudents+'</td><td><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="openCourseModal(\''+c.id+'\')">编辑</button><button class="btn btn-sm btn-danger" onclick="deleteCourse(\''+c.id+'\')">删除</button></div></td></tr>'});
+    html+='</tbody></table>';
+    document.getElementById('coursesList').innerHTML=html;
+}
+
+async function loadTeachers(){
+    data.teachers=await fetch(API+'/teachers').then(r=>r.json());
+    renderTeachers();
+}
+
+function renderTeachers(){
+    const search=document.getElementById('teacherSearch').value.toLowerCase();
+    const list=data.teachers.filter(t=>t.name.toLowerCase().includes(search)||t.id.toLowerCase().includes(search));
+    let html='<table class="schedule-table"><thead><tr><th>ID</th><th>姓名</th><th>科目</th><th>电话</th><th>办公室</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(t=>{html+='<tr><td>'+t.id+'</td><td>'+t.name+'</td><td>'+t.subject+'</td><td>'+t.phone+'</td><td>'+t.office+'</td><td><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="openTeacherModal(\''+t.id+'\')">编辑</button><button class="btn btn-sm btn-danger" onclick="deleteTeacher(\''+t.id+'\')">删除</button></div></td></tr>'});
+    html+='</tbody></table>';
+    document.getElementById('teachersList').innerHTML=html;
+}
+
+async function loadStudents(){
+    data.students=await fetch(API+'/students').then(r=>r.json());
+    renderStudents();
+}
+
+function renderStudents(){
+    const search=document.getElementById('studentSearch').value.toLowerCase();
+    const list=data.students.filter(s=>s.name.toLowerCase().includes(search)||s.id.toLowerCase().includes(search)||(s.class&&s.class.toLowerCase().includes(search)));
+    let html='<table class="schedule-table"><thead><tr><th>ID</th><th>姓名</th><th>班级</th><th>专业</th><th>操作</th></tr></thead><tbody>';
+    list.slice(0,50).forEach(s=>{html+='<tr><td>'+s.id+'</td><td>'+s.name+'</td><td>'+(s.class||'')+'</td><td>'+(s.major||'')+'</td><td><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="openStudentModal(\''+s.id+'\')">编辑</button><button class="btn btn-sm btn-danger" onclick="deleteStudent(\''+s.id+'\')">删除</button></div></td></tr>'});
+    html+='</tbody></table>';
+    document.getElementById('studentsList').innerHTML=html;
+}
+
+async function loadClassrooms(){
+    data.classrooms=await fetch(API+'/classrooms').then(r=>r.json());
+    renderClassrooms();
+}
+
+function renderClassrooms(){
+    const search=document.getElementById('classroomSearch').value.toLowerCase();
+    const list=data.classrooms.filter(r=>r.name.toLowerCase().includes(search)||r.id.toLowerCase().includes(search));
+    let html='<table class="schedule-table"><thead><tr><th>ID</th><th>名称</th><th>容量</th><th>楼栋</th><th>类型</th><th>操作</th></tr></thead><tbody>';
+    list.forEach(r=>{html+='<tr><td>'+r.id+'</td><td>'+r.name+'</td><td>'+r.capacity+'</td><td>'+r.building+'</td><td>'+r.type+'</td><td><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="openClassroomModal(\''+r.id+'\')">编辑</button><button class="btn btn-sm btn-danger" onclick="deleteClassroom(\''+r.id+'\')">删除</button></div></td></tr>'});
+    html+='</tbody></table>';
+    document.getElementById('classroomsList').innerHTML=html;
+}
+
+function openCourseModal(id){
+    const course=id?data.courses.find(c=>c.id===id):null;
+    const html='<h2>'+(id?'编辑课程':'添加课程')+'<button onclick="closeModal()">×</button></h2>'+
+        '<form onsubmit="saveCourse(event,\''+(id||'')+'\')">'+
+        '<div class="form-group"><label>ID</label><input name="id" value="'+(course?.id||'')+'" '+(id?'readonly':'')+' required></div>'+
+        '<div class="form-group"><label>名称</label><input name="name" value="'+(course?.name||'')+'" required></div>'+
+        '<div class="form-group"><label>类别</label><select name="category" required><option value="">请选择</option><option value="计算机" '+(course?.category==='计算机'?'selected':'')+'>计算机</option><option value="数学" '+(course?.category==='数学'?'selected':'')+'>数学</option><option value="物理" '+(course?.category==='物理'?'selected':'')+'>物理</option><option value="英语" '+(course?.category==='英语'?'selected':'')+'>英语</option><option value="政治" '+(course?.category==='政治'?'selected':'')+'>政治</option><option value="历史" '+(course?.category==='历史'?'selected':'')+'>历史</option></select></div>'+
+        '<div class="form-row"><div class="form-group"><label>学分</label><input name="credits" type="number" value="'+(course?.credits||3)+'" required></div><div class="form-group"><label>最大人数</label><input name="maxStudents" type="number" value="'+(course?.maxStudents||60)+'" required></div></div>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+function openTeacherModal(id){
+    const teacher=id?data.teachers.find(t=>t.id===id):null;
+    const html='<h2>'+(id?'编辑教师':'添加教师')+'<button onclick="closeModal()">×</button></h2>'+
+        '<form onsubmit="saveTeacher(event,\''+(id||'')+'\')">'+
+        '<div class="form-group"><label>ID</label><input name="id" value="'+(teacher?.id||'')+'" '+(id?'readonly':'')+' required></div>'+
+        '<div class="form-group"><label>姓名</label><input name="name" value="'+(teacher?.name||'')+'" required></div>'+
+        '<div class="form-group"><label>性别</label><select name="gender" required><option value="男" '+(teacher?.gender==='男'?'selected':'')+'>男</option><option value="女" '+(teacher?.gender==='女'?'selected':'')+'>女</option></select></div>'+
+        '<div class="form-group"><label>科目</label><select name="subject" required><option value="">请选择</option><option value="计算机" '+(teacher?.subject==='计算机'?'selected':'')+'>计算机</option><option value="数学" '+(teacher?.subject==='数学'?'selected':'')+'>数学</option><option value="物理" '+(teacher?.subject==='物理'?'selected':'')+'>物理</option><option value="英语" '+(teacher?.subject==='英语'?'selected':'')+'>英语</option><option value="政治" '+(teacher?.subject==='政治'?'selected':'')+'>政治</option><option value="历史" '+(teacher?.subject==='历史'?'selected':'')+'>历史</option></select></div>'+
+        '<div class="form-row"><div class="form-group"><label>电话</label><input name="phone" value="'+(teacher?.phone||'')+'" required></div><div class="form-group"><label>最大课时</label><input name="maxHours" type="number" value="'+(teacher?.maxHours||16)+'" required></div></div>'+
+        '<div class="form-group"><label>办公室</label><input name="office" value="'+(teacher?.office||'')+'"></div>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+function openStudentModal(id){
+    const student=id?data.students.find(s=>s.id===id):null;
+    const html='<h2>'+(id?'编辑学生':'添加学生')+'<button onclick="closeModal()">×</button></h2>'+
+        '<form onsubmit="saveStudent(event,\''+(id||'')+'\')">'+
+        '<div class="form-group"><label>ID</label><input name="id" value="'+(student?.id||'')+'" '+(id?'readonly':'')+' required></div>'+
+        '<div class="form-group"><label>姓名</label><input name="name" value="'+(student?.name||'')+'" required></div>'+
+        '<div class="form-group"><label>性别</label><select name="gender" required><option value="男" '+(student?.gender==='男'?'selected':'')+'>男</option><option value="女" '+(student?.gender==='女'?'selected':'')+'>女</option></select></div>'+
+        '<div class="form-group"><label>班级</label><input name="class" value="'+(student?.class||'')+'"></div>'+
+        '<div class="form-group"><label>专业</label><input name="major" value="'+(student?.major||'')+'"></div>'+
+        '<div class="form-group"><label>年级</label><input name="grade" value="'+(student?.grade||'')+'"></div>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+function openClassroomModal(id){
+    const room=id?data.classrooms.find(r=>r.id===id):null;
+    const html='<h2>'+(id?'编辑教室':'添加教室')+'<button onclick="closeModal()">×</button></h2>'+
+        '<form onsubmit="saveClassroom(event,\''+(id||'')+'\')">'+
+        '<div class="form-group"><label>ID</label><input name="id" value="'+(room?.id||'')+'" '+(id?'readonly':'')+' required></div>'+
+        '<div class="form-group"><label>名称</label><input name="name" value="'+(room?.name||'')+'" required></div>'+
+        '<div class="form-group"><label>容量</label><input name="capacity" type="number" value="'+(room?.capacity||60)+'" required></div>'+
+        '<div class="form-group"><label>楼栋</label><input name="building" value="'+(room?.building||'教学楼A')+'"></div>'+
+        '<div class="form-group"><label>类型</label><select name="type"><option value="普通教室">普通教室</option><option value="多媒体教室" '+(room?.type==='多媒体教室'?'selected':'')+'>多媒体教室</option><option value="实验室" '+(room?.type==='实验室'?'selected':'')+'>实验室</option></select></div>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+function openScheduleModal(){
+    const courseOpts=data.courses.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');
+    const teacherOpts=data.teachers.map(t=>'<option value="'+t.id+'">'+t.name+' - '+t.subject+'</option>').join('');
+    const classroomOpts=data.classrooms.map(r=>'<option value="'+r.id+'">'+r.name+' ('+r.building+', '+r.capacity+'人)</option>').join('');
+    const classOpts=data.classes.map(c=>'<option value="'+c.id+'">'+c.name+'</option>').join('');
+    const html='<h2>手动排课<button onclick="closeModal()">×</button></h2>'+
+        '<form onsubmit="saveSchedule(event)">'+
+        '<div class="form-group"><label>课程 *</label><select name="courseId" required><option value="">请选择课程</option>'+courseOpts+'</select></div>'+
+        '<div class="form-group"><label>教师 *</label><select name="teacherId" required><option value="">请选择教师</option>'+teacherOpts+'</select></div>'+
+        '<div class="form-group"><label>班级 *</label><select name="classId" required><option value="">请选择班级</option>'+classOpts+'</select></div>'+
+        '<div class="form-group"><label>教室 *</label><select name="classroomId" required><option value="">请选择教室</option>'+classroomOpts+'</select></div>'+
+        '<div class="form-row"><div class="form-group"><label>星期</label><select name="dayOfWeek" required><option value="1">周一</option><option value="2">周二</option><option value="3">周三</option><option value="4">周四</option><option value="5">周五</option></select></div><div class="form-group"><label>周次</label><input name="weeks" value="1-16" placeholder="如: 1-16"></div></div>'+
+        '<div class="form-row"><div class="form-group"><label>开始节次 (1-8)</label><input name="startSection" type="number" min="1" max="8" value="1" required></div><div class="form-group"><label>结束节次 (1-8)</label><input name="endSection" type="number" min="1" max="8" value="2" required></div></div>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="submit" class="btn btn-success">保存</button></div></form>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+function openAutoScheduleModal(){
+    // 多选老师
+    const teacherCheckboxes=data.teachers.map(t=>'<label style="display:inline-block;margin:5px;padding:8px;background:#f0f0f0;border-radius:5px;cursor:pointer"><input type="checkbox" name="teacher" value="'+t.id+'" style="margin-right:5px">'+t.name+' ('+t.subject+')</label>').join('');
+    // 周次选择
+    const weekOptions=[];
+    for(let i=1;i<=16;i++)weekOptions.push('<option value="'+i+'">第'+i+'周</option>');
+    const html='<h2>智能排课<button onclick="closeModal()">×</button></h2>'+
+        '<div class="form-group" style="margin-bottom:15px"><label>选择周次</label><select id="autoScheduleWeek" style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px"><option value="all">全周(1-16周)</option>'+weekOptions.join('')+'</select></div>'+
+        '<p style="margin-bottom:15px;color:#666">选择需要排课的老师（不选则所有老师都参与排课）：</p>'+
+        '<div style="max-height:200px;overflow-y:auto;margin-bottom:15px;">'+teacherCheckboxes+'</div>'+
+        '<p style="font-size:12px;color:#999">为选中的周次排课，每周独立不冲突</p>'+
+        '<div class="modal-actions"><button type="button" class="btn btn-danger" onclick="closeModal()">取消</button><button type="button" class="btn btn-success" onclick="doAutoSchedule()">开始排课</button></div>';
+    document.getElementById('modalContent').innerHTML=html;
+    document.getElementById('modal').classList.add('active');
+}
+
+async function doAutoSchedule(){
+    const checkboxes=document.querySelectorAll('input[name="teacher"]:checked');
+    const teacherIds=Array.from(checkboxes).map(c=>c.value);
+    const weekSelect=document.getElementById('autoScheduleWeek');
+    const selectedWeek=weekSelect?weekSelect.value:'all';
+    closeModal();
+    
+    // 构建请求参数
+    const requestBody={teacherIds:teacherIds.length>0?teacherIds:null};
+    if(selectedWeek!=='all'){
+        // 指定具体周次，只排那一周
+        requestBody.specificWeeks=selectedWeek;
+    }else{
+        // 全周模式
+        requestBody.weekType='all';
+    }
+    
+    const res=await fetch(API+'/schedules/auto',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify(requestBody)
+    });
+    const d=await res.json();
+    alert('智能排课完成！添加了 '+d.added+' 条课表');
+    // 刷新当前老师课表
+    const selectedTeacher=document.getElementById('teacherSelect').value;
+    if(selectedTeacher)loadTeacherSchedule();
+    // 刷新当前班级课表
+    const selectedClass=document.getElementById('classSelect').value;
+    if(selectedClass)loadClassSchedule();
+}
+
+async function saveSchedule(e){
+    e.preventDefault();
+    const f=e.target;
+    if(parseInt(f.startSection.value)>parseInt(f.endSection.value)){
+        alert('开始节次不能大于结束节次');
+        return;
+    }
+    const d={
+        courseId:f.courseId.value,
+        teacherId:f.teacherId.value,
+        classId:f.classId.value,
+        classroomId:f.classroomId.value,
+        dayOfWeek:parseInt(f.dayOfWeek.value),
+        startSection:parseInt(f.startSection.value),
+        endSection:parseInt(f.endSection.value),
+        weeks:f.weeks.value||'1-16'
+    };
+    await fetch(API+'/schedules',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    closeModal();
+    // 刷新当前老师课表
+    const selectedTeacher=document.getElementById('teacherSelect').value;
+    if(selectedTeacher)loadTeacherSchedule();
+    // 刷新当前班级课表
+    const selectedClass=document.getElementById('classSelect').value;
+    if(selectedClass)loadClassSchedule();
+    alert('排课成功');
+}
+
+function closeModal(){
+    document.getElementById('modal').classList.remove('active');
+}
+
+async function saveCourse(e,id){
+    e.preventDefault();
+    const f=e.target;
+    const d={id:f.id.value,name:f.name.value,category:f.category.value,credits:parseInt(f.credits.value),maxStudents:parseInt(f.maxStudents.value)};
+    await fetch(API+'/courses'+(id?'/'+id:''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    closeModal();
+    loadCourses();
+    loadStats();
+}
+
+async function saveTeacher(e,id){
+    e.preventDefault();
+    const f=e.target;
+    const d={id:f.id.value,name:f.name.value,gender:f.gender.value,subject:f.subject.value,phone:f.phone.value,maxHours:parseInt(f.maxHours.value),office:f.office.value};
+    await fetch(API+'/teachers'+(id?'/'+id:''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    closeModal();
+    loadTeachers();
+    loadStats();
+}
+
+async function saveStudent(e,id){
+    e.preventDefault();
+    const f=e.target;
+    const d={id:f.id.value,name:f.name.value,gender:f.gender.value,class:f.class.value,major:f.major.value,grade:f.grade.value};
+    await fetch(API+'/students'+(id?'/'+id:''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    closeModal();
+    loadStudents();
+    loadStats();
+}
+
+async function saveClassroom(e,id){
+    e.preventDefault();
+    const f=e.target;
+    const d={id:f.id.value,name:f.name.value,capacity:parseInt(f.capacity.value),building:f.building.value,type:f.type.value,equipment:['投影仪','电脑','音响']};
+    await fetch(API+'/classrooms'+(id?'/'+id:''),{method:id?'PUT':'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});
+    closeModal();
+    loadClassrooms();
+    loadStats();
+}
+
+async function deleteCourse(id){
+    if(!confirm('确定删除?'))return;
+    await fetch(API+'/courses/'+id,{method:'DELETE'});
+    loadCourses();
+    loadStats();
+}
+
+async function deleteTeacher(id){
+    if(!confirm('确定删除?'))return;
+    await fetch(API+'/teachers/'+id,{method:'DELETE'});
+    loadTeachers();
+    loadStats();
+}
+
+async function deleteStudent(id){
+    if(!confirm('确定删除?'))return;
+    await fetch(API+'/students/'+id,{method:'DELETE'});
+    loadStudents();
+    loadStats();
+}
+
+async function deleteClassroom(id){
+    if(!confirm('确定删除?'))return;
+    await fetch(API+'/classrooms/'+id,{method:'DELETE'});
+    loadClassrooms();
+    loadStats();
+}
+
+async function loadSchedule(){
+    await loadAllData();
+    document.getElementById('scheduleView').innerHTML='<div class="empty">请选择老师查看课表</div>';
+}
+
+async function loadTeacherSchedule(){
+    const teacherId=document.getElementById('teacherSelect').value;
+    const weekFilter=document.getElementById('weekSelect').value;
+    if(!teacherId){document.getElementById('scheduleView').innerHTML='<div class="empty">请选择老师查看课表</div>';return;}
+    data.schedules=await fetch(API+'/schedules').then(r=>r.json());
+    const teacher=data.teachers.find(t=>t.id===teacherId);
+    let mySchedules=data.schedules.filter(s=>s.teacherId===teacherId);
+    
+    // 按周次筛选 - 修复：使用精确匹配而不是字符串包含，支持范围格式如 "1-16"
+    if(weekFilter!=='all'){
+        const targetWeek=parseInt(weekFilter);
+        mySchedules=mySchedules.filter(s=>{
+            const weekParts=s.weeks.split(',');
+            for(const part of weekParts){
+                if(part.includes('-')){
+                    const[start,end]=part.split('-').map(Number);
+                    if(targetWeek>=start&&targetWeek<=end)return true;
+                }else if(parseInt(part)===targetWeek){
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+    
+    if(!mySchedules.length){document.getElementById('scheduleView').innerHTML='<div class="empty">该老师暂无排课</div>';return;}
+    const days=['周一','周二','周三','周四','周五'];
+    let html='<h3 style="margin-bottom:15px">'+teacher.name+' 老师课表';
+    if(weekFilter!=='all')html+=' (第'+weekFilter+'周)';
+    else html+=' (全部周次 - 单双周交替显示)';
+    html+='</h3>';
+    html+='<table class="schedule-table"><thead><tr><th>时间</th>';
+    days.forEach(d=>html+='<th>'+d+'</th>');
+    html+='</tr></thead><tbody>';
+    for(let s=1;s<=8;s++){
+        html+='<tr><td>第'+s+'节</td>';
+        for(let d=1;d<=5;d++){
+            const sc=mySchedules.filter(x=>x.dayOfWeek===d&&x.startSection<=s&&x.endSection>=s);
+            if(sc.length){
+                // 在"全部周"模式下，如果同一时间段有多门课（单双周交替），需要特殊显示
+                if(weekFilter==='all' && sc.length>1){
+                    html+='<td>'+sc.map(x=>{
+                        const isSingle=x.weeks.includes('1')&&x.weeks.includes('3');
+                        const weekBadge=isSingle?'<span style="background:#e3f2fd;color:#1976d2;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;">单</span>':'<span style="background:#f3e5f5;color:#7b1fa2;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;">双</span>';
+                        return'<div class="schedule-cell" style="margin-bottom:4px;"><div class="course">'+weekBadge+x.courseName+'</div><div class="room">'+x.classroomName+'</div><div class="cls">'+x.className+'</div></div>';
+                    }).join('')+'</td>';
+                }else{
+                    html+='<td>'+sc.map(x=>'<div class="schedule-cell"><div class="course">'+x.courseName+'</div><div class="room">'+x.classroomName+'</div><div class="cls">'+x.className+'</div></div>').join('')+'</td>';
+                }
+            }else html+='<td class="empty-cell"></td>';
+        }
+        html+='</tr>';
+    }
+    html+='</tbody></table>';
+    document.getElementById('scheduleView').innerHTML=html;
+}
+
+async function loadClassSchedule(){
+    const classId=document.getElementById('classSelect').value;
+    const weekFilter=document.getElementById('classWeekSelect').value;
+    if(!classId){document.getElementById('classScheduleView').innerHTML='';return;}
+    data.schedules=await fetch(API+'/schedules').then(r=>r.json());
+    const cls=data.classes.find(c=>c.id===classId);
+    let mySchedules=data.schedules.filter(s=>s.classId===classId);
+    
+    // 按周次筛选 - 修复：使用精确匹配而不是字符串包含，支持范围格式如 "1-16"
+    if(weekFilter!=='all'){
+        const targetWeek=parseInt(weekFilter);
+        mySchedules=mySchedules.filter(s=>{
+            const weekParts=s.weeks.split(',');
+            for(const part of weekParts){
+                if(part.includes('-')){
+                    const[start,end]=part.split('-').map(Number);
+                    if(targetWeek>=start&&targetWeek<=end)return true;
+                }else if(parseInt(part)===targetWeek){
+                    return true;
+                }
+            }
+            return false;
+        });
+    }
+    
+    if(!mySchedules.length){document.getElementById('classScheduleView').innerHTML='<div class="empty">该班级暂无排课</div>';return;}
+    const days=['周一','周二','周三','周四','周五'];
+    let html='<h3 style="margin-bottom:15px">'+cls.name+' 课表';
+    if(weekFilter!=='all')html+=' (第'+weekFilter+'周)';
+    else html+=' (全部周次 - 单双周交替显示)';
+    html+='</h3>';
+    html+='<table class="schedule-table"><thead><tr><th>时间</th>';
+    days.forEach(d=>html+='<th>'+d+'</th>');
+    html+='</tr></thead><tbody>';
+    for(let s=1;s<=8;s++){
+        html+='<tr><td>第'+s+'节</td>';
+        for(let d=1;d<=5;d++){
+            const sc=mySchedules.filter(x=>x.dayOfWeek===d&&x.startSection<=s&&x.endSection>=s);
+            if(sc.length){
+                // 在"全部周"模式下，如果同一时间段有多门课（单双周交替），需要特殊显示
+                if(weekFilter==='all' && sc.length>1){
+                    html+='<td>'+sc.map(x=>{
+                        const isSingle=x.weeks.includes('1')&&x.weeks.includes('3');
+                        const weekBadge=isSingle?'<span style="background:#e3f2fd;color:#1976d2;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;">单</span>':'<span style="background:#f3e5f5;color:#7b1fa2;padding:2px 6px;border-radius:4px;font-size:10px;margin-right:4px;">双</span>';
+                        return'<div class="schedule-cell" style="margin-bottom:4px;"><div class="course">'+weekBadge+x.courseName+'</div><div class="room">'+x.classroomName+'</div><div class="cls">'+x.teacherName+'</div></div>';
+                    }).join('')+'</td>';
+                }else{
+                    html+='<td>'+sc.map(x=>'<div class="schedule-cell"><div class="course">'+x.courseName+'</div><div class="room">'+x.classroomName+'</div><div class="cls">'+x.teacherName+'</div></div>').join('')+'</td>';
+                }
+            }else html+='<td class="empty-cell"></td>';
+        }
+        html+='</tr>';
+    }
+    html+='</tbody></table>';
+    document.getElementById('classScheduleView').innerHTML=html;
+}
+
+async function autoSchedule(){
+    await fetch(API+'/schedules/auto',{method:'POST'});
+    alert('智能排课完成');
+    // 刷新当前老师课表
+    const selectedTeacher=document.getElementById('teacherSelect').value;
+    if(selectedTeacher)loadTeacherSchedule();
+    // 刷新当前班级课表
+    const selectedClass=document.getElementById('classSelect').value;
+    if(selectedClass)loadClassSchedule();
+}
+
+async function clearSchedule(){
+    if(!confirm('确定清空所有排课?'))return;
+    await fetch(API+'/schedules',{method:'DELETE'});
+    // 刷新当前老师课表
+    const selectedTeacher=document.getElementById('teacherSelect').value;
+    if(selectedTeacher)loadTeacherSchedule();
+    // 刷新当前班级课表
+    const selectedClass=document.getElementById('classSelect').value;
+    if(selectedClass)loadClassSchedule();
+}
+
+function goToSection(section,editId){
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelector('[data-section="'+section+'"]').classList.add('active');
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    document.getElementById(section).classList.add('active');
+    const titles={dashboard:'仪表盘',courses:'课程管理',teachers:'教师管理',students:'学生管理',classrooms:'教室管理',schedule:'排课管理','my-schedule':'我的课表','ai-assistant':'AI 助手'};
+    document.getElementById('pageTitle').textContent=titles[section];
+    loadSection(section).then(()=>{
+        if(editId){
+            if(section==='courses')openCourseModal(editId);
+            else if(section==='teachers')openTeacherModal(editId);
+            else if(section==='students')openStudentModal(editId);
+            else if(section==='classrooms')openClassroomModal(editId);
+        }
+    });
+}
+
+async function showDetail(type){
+    const container=document.getElementById('dashboardDetail');
+    let html='<div style="background:#fff;padding:20px;border-radius:10px;margin-top:20px;"><div class="detail-header"><h3>';
+    let items=[];
+    if(type==='courses'){
+        items=await fetch(API+'/courses').then(r=>r.json());
+        html+='课程列表 ('+items.length+'门)</h3><button class="btn btn-primary" onclick="goToSection(\'courses\')">进入管理</button></div><div class="detail-list">';
+        items.forEach(c=>html+='<div class="detail-item"><div class="info"><div class="name">'+c.name+'</div><div class="desc">'+c.id+' | '+c.category+' | '+c.credits+'学分</div></div><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="goToSection(\'courses\',\''+c.id+'\')">编辑</button></div></div>');
+    }else if(type==='teachers'){
+        items=await fetch(API+'/teachers').then(r=>r.json());
+        html+='教师列表 ('+items.length+'人)</h3><button class="btn btn-primary" onclick="goToSection(\'teachers\')">进入管理</button></div><div class="detail-list">';
+        items.forEach(t=>html+='<div class="detail-item"><div class="info"><div class="name">'+t.name+'</div><div class="desc">'+t.id+' | '+t.subject+'</div></div><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="goToSection(\'teachers\',\''+t.id+'\')">编辑</button></div></div>');
+    }else if(type==='students'){
+        items=await fetch(API+'/students').then(r=>r.json());
+        html+='学生列表 ('+items.length+'人)</h3><button class="btn btn-primary" onclick="goToSection(\'students\')">进入管理</button></div><div class="detail-list">';
+        items.slice(0,20).forEach(s=>html+='<div class="detail-item"><div class="info"><div class="name">'+s.name+'</div><div class="desc">'+s.id+' | '+(s.class||'')+'</div></div><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="goToSection(\'students\',\''+s.id+'\')">编辑</button></div></div>');
+    }else if(type==='classrooms'){
+        items=await fetch(API+'/classrooms').then(r=>r.json());
+        html+='教室列表 ('+items.length+'间)</h3><button class="btn btn-primary" onclick="goToSection(\'classrooms\')">进入管理</button></div><div class="detail-list">';
+        items.forEach(r=>html+='<div class="detail-item"><div class="info"><div class="name">'+r.name+'</div><div class="desc">'+r.id+' | '+r.capacity+'人 | '+r.building+'</div></div><div class="action-btns"><button class="btn btn-sm btn-warning" onclick="goToSection(\'classrooms\',\''+r.id+'\')">编辑</button></div></div>');
+    }
+    html+='</div></div>';
+    container.innerHTML=html;
+}
+
+// ============ AI 聊天功能 ============
+let chatHistory = [];
+let currentAIModel = { provider: 'codingplan', model: 'qwen3-max-2026-01-23' };
+
+// 初始化模型选择器
+async function initModelSelector() {
+    try {
+        const response = await fetch(API + '/ai/model');
+        const data = await response.json();
+        currentAIModel = { provider: data.provider, model: data.model };
+        
+        const selector = document.getElementById('modelSelector');
+        if (selector) {
+            selector.value = data.provider + '|' + data.model;
+        }
+        
+        console.log('当前 AI 模型:', currentAIModel);
+    } catch (e) {
+        console.error('加载模型配置失败:', e);
+    }
+}
+
+// 切换 AI 模型
+async function changeAIModel() {
+    const selector = document.getElementById('modelSelector');
+    const [provider, model] = selector.value.split('|');
+    
+    try {
+        const response = await fetch(API + '/ai/model', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ provider, model })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            currentAIModel = { provider, model };
+            addChatMessage('ai', `✅ 已切换到 ${getModelDisplayName(provider, model)}`);
+            
+            // 如果是 OpenClaw 模式，显示特殊提示
+            if (provider === 'openclaw') {
+                addChatMessage('ai', '💡 OpenClaw 模式已启用。请在当前 OpenClaw 会话中直接提问排课相关问题。');
+            }
+        } else {
+            addChatMessage('ai', '❌ 切换模型失败: ' + result.error);
+        }
+    } catch (e) {
+        addChatMessage('ai', '❌ 切换模型出错: ' + e.message);
+    }
+}
+
+// 获取模型显示名称
+function getModelDisplayName(provider, model) {
+    const names = {
+        'codingplan': 'CodingPlan',
+        'ollama': '本地 Ollama',
+        'openclaw': 'OpenClaw'
+    };
+    return names[provider] || provider;
+}
+
+function initChat() {
+    const input = document.getElementById('chatInput');
+    if (input) {
+        input.focus();
+    }
+}
+
+async function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('chatSendBtn');
+    const message = input.value.trim();
+    
+    if (!message) return;
+    
+    // 添加用户消息
+    addChatMessage('user', message);
+    input.value = '';
+    
+    // 显示输入中状态
+    showTypingIndicator();
+    sendBtn.disabled = true;
+    
+    try {
+        // 调用 AI 接口
+        const response = await fetch(API + '/ai/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message })
+        });
+        
+        const result = await response.json();
+        
+        // 移除输入中状态
+        removeTypingIndicator();
+        
+        // 处理 OpenClaw 模式
+        if (result.openclawMode) {
+            addChatMessage('ai', result.reply);
+            sendBtn.disabled = false;
+            return;
+        }
+        
+        // 添加 AI 回复
+        addChatMessage('ai', result.reply, result);
+        
+        // 自动排课直接执行，不需要确认
+        if (result.intent === 'auto' && !result.needsConfirm) {
+            // 延迟一下显示执行中状态
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'auto', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '✅ ' + execResult.message + '\n\n📊 已生成 ' + (execResult.schedules?.length || 0) + ' 条排课记录');
+                        await loadAllData();
+                    } else {
+                        addChatMessage('ai', '❌ 自动排课失败：' + execResult.error);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // replace 指令直接执行
+        if (result.intent === 'replace') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'replace', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '✅ ' + execResult.message);
+                        // 完全重新加载所有数据
+                        await loadAllData();
+                        // 强制刷新课表数据
+                        data.schedules = await fetch(API+'/schedules').then(r=>r.json());
+                        data.teachers = await fetch(API+'/teachers').then(r=>r.json());
+                        data.courses = await fetch(API+'/courses').then(r=>r.json());
+                        data.classes = await fetch(API+'/classes').then(r=>r.json());
+                        // 刷新当前课表视图
+                        const selectedTeacher = document.getElementById('teacherSelect')?.value;
+                        const selectedClass = document.getElementById('classSelect')?.value;
+                        if (selectedTeacher) {
+                            await loadTeacherSchedule();
+                            addChatMessage('ai', '📋 教师课表已更新，请查看"排课管理"页面');
+                        }
+                        if (selectedClass) {
+                            await loadClassSchedule();
+                            addChatMessage('ai', '📋 班级课表已更新，请查看"我的课表"页面');
+                        }
+                        // 如果没有选中任何视图，提示用户手动刷新
+                        if (!selectedTeacher && !selectedClass) {
+                            addChatMessage('ai', '💡 课程已更换，请切换到"排课管理"或"我的课表"查看最新课表');
+                        }
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '操作失败';
+                        addChatMessage('ai', '❌ 更换课程失败：' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // swap 指令直接执行（互换老师课程）
+        if (result.intent === 'swap') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'swap', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '✅ ' + execResult.message);
+                        await loadAllData();
+                        const selectedTeacher = document.getElementById('teacherSelect')?.value;
+                        const selectedClass = document.getElementById('classSelect')?.value;
+                        if (selectedTeacher) await loadTeacherSchedule();
+                        if (selectedClass) await loadClassSchedule();
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '操作失败';
+                        addChatMessage('ai', '❌ 互换课程失败：' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // query 指令：调用 execute 获取真实课程信息
+        if (result.intent === 'query') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'query', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '📋 ' + execResult.message);
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '查询失败';
+                        addChatMessage('ai', '❌ ' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        } else if (result.intent === 'unknown') {
+            addChatMessage('ai', result.reply || '我理解你想查询信息...');
+        }
+        // delete 指令直接执行
+        if (result.intent === 'delete') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'delete', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '✅ ' + execResult.message);
+                        // 完全重新加载所有数据
+                        await loadAllData();
+                        // 强制刷新课表数据
+                        data.schedules = await fetch(API+'/schedules').then(r=>r.json());
+                        // 刷新当前课表视图
+                        const selectedTeacher = document.getElementById('teacherSelect')?.value;
+                        const selectedClass = document.getElementById('classSelect')?.value;
+                        if (selectedTeacher) {
+                            await loadTeacherSchedule();
+                            addChatMessage('ai', '📋 教师课表已更新，请查看"排课管理"页面');
+                        }
+                        if (selectedClass) {
+                            await loadClassSchedule();
+                            addChatMessage('ai', '📋 班级课表已更新，请查看"我的课表"页面');
+                        }
+                        // 如果没有选中任何视图，提示用户手动刷新
+                        if (!selectedTeacher && !selectedClass) {
+                            addChatMessage('ai', '💡 课程已删除，请切换到"排课管理"或"我的课表"查看最新课表');
+                        }
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '操作失败';
+                        addChatMessage('ai', '❌ 删除课程失败：' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // move 指令直接执行
+        if (result.intent === 'move') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'move', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        addChatMessage('ai', '✅ ' + execResult.message);
+                        await loadAllData();
+                        data.schedules = await fetch(API+'/schedules').then(r=>r.json());
+                        const selectedTeacher = document.getElementById('teacherSelect')?.value;
+                        const selectedClass = document.getElementById('classSelect')?.value;
+                        if (selectedTeacher) await loadTeacherSchedule();
+                        if (selectedClass) await loadClassSchedule();
+                        if (!selectedTeacher && !selectedClass) {
+                            addChatMessage('ai', '💡 课程已移动，请切换到"排课管理"或"我的课表"查看最新课表');
+                        }
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '操作失败';
+                        addChatMessage('ai', '❌ 移动课程失败：' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // check 指令直接执行
+        if (result.intent === 'check') {
+            setTimeout(async () => {
+                showTypingIndicator();
+                try {
+                    const execResponse = await fetch(API + '/ai/execute', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ intent: 'check', params: result.params })
+                    });
+                    const execResult = await execResponse.json();
+                    removeTypingIndicator();
+                    if (execResult.success) {
+                        let message = '✅ ' + execResult.message;
+                        if (execResult.conflicts && execResult.conflicts.length > 0) {
+                            message += '\n\n发现以下冲突：\n' + execResult.conflicts.map(c => 
+                                `• ${c.type}: ${c.description}`
+                            ).join('\n');
+                        }
+                        addChatMessage('ai', message);
+                    } else {
+                        const errorMsg = execResult.message || execResult.error || '操作失败';
+                        addChatMessage('ai', '❌ 检查冲突失败：' + errorMsg);
+                    }
+                } catch (e) {
+                    removeTypingIndicator();
+                    addChatMessage('ai', '❌ 执行出错：' + e.message);
+                }
+            }, 500);
+        }
+        
+        // 如果需要确认（非自动排课/replace/delete/move/check），显示确认按钮
+        if (result.needsConfirm && result.intent !== 'unknown' && result.intent !== 'auto' && result.intent !== 'replace' && result.intent !== 'delete' && result.intent !== 'move' && result.intent !== 'check') {
+            showConfirmButtons(result);
+        }
+        
+        // 显示快速操作按钮
+        if (!document.querySelector('.chat-action-btns')) {
+            showQuickActionButtons();
+        }
+        
+    } catch (error) {
+        removeTypingIndicator();
+        addChatMessage('ai', '抱歉，服务暂时不可用，请稍后再试。');
+    }
+    
+    sendBtn.disabled = false;
+}
+
+function addChatMessage(sender, text, data) {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-message ' + sender;
+    
+    let html = '<div class="chat-avatar">';
+    html += sender === 'ai' ? '<i class="fas fa-robot"></i>' : '<i class="fas fa-user"></i>';
+    html += '</div><div class="chat-bubble">' + escapeHtml(text) + '</div>';
+    
+    div.innerHTML = html;
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+    
+    // 保存到历史
+    chatHistory.push({ sender, text, data, time: new Date() });
+}
+
+function showTypingIndicator() {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-message ai typing';
+    div.id = 'typingIndicator';
+    div.innerHTML = '<div class="chat-avatar"><i class="fas fa-robot"></i></div>' +
+        '<div class="chat-bubble"><div class="typing-indicator"><span></span><span></span><span></span></div></div>';
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+function removeTypingIndicator() {
+    const indicator = document.getElementById('typingIndicator');
+    if (indicator) {
+        indicator.remove();
+    }
+}
+
+function showConfirmButtons(result) {
+    const container = document.getElementById('chatMessages');
+    const lastMessage = container.lastElementChild;
+    
+    const confirmDiv = document.createElement('div');
+    confirmDiv.className = 'chat-confirm-box';
+    confirmDiv.innerHTML = '<div>确认执行此操作吗？</div>' +
+        '<div class="chat-confirm-btns">' +
+        '<button class="btn btn-success" onclick="executeAIAction(' + JSON.stringify(result).replace(/"/g, '&quot;') + ')">确认执行</button>' +
+        '<button class="btn btn-danger" onclick="this.parentElement.parentElement.remove()">取消</button>' +
+        '</div>';
+    
+    lastMessage.querySelector('.chat-bubble').appendChild(confirmDiv);
+}
+
+// 显示快速操作按钮（OpenClaw 模式）
+function showQuickActionButtons() {
+    const container = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-message ai';
+    div.innerHTML = '<div class="chat-avatar"><i class="fas fa-robot"></i></div>' +
+        '<div class="chat-bubble">' +
+        '<div style="margin-bottom:10px;">您可以直接问我：</div>' +
+        '<div class="chat-action-btns">' +
+        '<button class="chat-action-btn" onclick="sendQuickMessage(\'查询所有课程\')">📚 查询课程</button>' +
+        '<button class="chat-action-btn" onclick="sendQuickMessage(\'查询教师列表\')">👨‍🏫 查询教师</button>' +
+        '<button class="chat-action-btn" onclick="sendQuickMessage(\'检查课程冲突\')">⚠️ 检查冲突</button>' +
+        '<button class="chat-action-btn" onclick="sendQuickMessage(\'自动排课\')">🤖 自动排课</button>' +
+        '</div></div>';
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
+// 快速发送消息
+function sendQuickMessage(text) {
+    const input = document.getElementById('chatInput');
+    input.value = text;
+    sendChatMessage();
+}
+
+async function executeAIAction(result) {
+    try {
+        const response = await fetch(API + '/ai/execute', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ intent: result.intent, params: result.params })
+        });
+        
+        const execResult = await response.json();
+        
+        if (execResult.success) {
+            addChatMessage('ai', '✅ ' + execResult.message);
+            // 刷新相关数据
+            await loadAllData();
+            if (document.getElementById('schedule').classList.contains('active')) {
+                loadSchedule();
+            }
+        } else {
+            addChatMessage('ai', '❌ 执行失败：' + execResult.error);
+        }
+    } catch (error) {
+        addChatMessage('ai', '❌ 执行出错：' + error.message);
+    }
+    
+    // 移除确认按钮
+    document.querySelectorAll('.chat-confirm-box').forEach(el => el.remove());
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+init();
+    </script>
+    <!-- PWA Service Worker Registration -->
+    <script>
+        // 注册 Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker 注册成功:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker 注册失败:', error);
+                    });
+            });
+        }
+
+        // 安装提示
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            console.log('PWA 可安装');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA 已安装');
+            deferredPrompt = null;
+        });
+    </script>
+</body>
+</html>

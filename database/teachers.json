@@ -1,0 +1,257 @@
+[
+  {
+    "id": "T001",
+    "name": "张伟",
+    "gender": "男",
+    "subject": "计算机",
+    "email": "zhangwei@school.edu",
+    "phone": "13800138001",
+    "maxHours": 16,
+    "office": "教学楼A301",
+    "availableTimes": [
+      "周一1-4",
+      "周二1-4",
+      "周三1-4",
+      "周四1-4",
+      "周五1-4"
+    ]
+  },
+  {
+    "id": "T002",
+    "name": "李娜",
+    "gender": "女",
+    "subject": "计算机",
+    "email": "lina@school.edu",
+    "phone": "13800138002",
+    "maxHours": 14,
+    "office": "教学楼A302",
+    "availableTimes": [
+      "周一3-5",
+      "周二1-4",
+      "周三3-5",
+      "周四1-4",
+      "周五1-3"
+    ]
+  },
+  {
+    "id": "T003",
+    "name": "王强",
+    "gender": "男",
+    "subject": "数学",
+    "email": "wangqiang@school.edu",
+    "phone": "13800138003",
+    "maxHours": 18,
+    "office": "教学楼B201",
+    "availableTimes": [
+      "周一1-5",
+      "周二1-5",
+      "周三1-5",
+      "周四1-5",
+      "周五1-3"
+    ]
+  },
+  {
+    "id": "T004",
+    "name": "刘芳",
+    "gender": "女",
+    "subject": "数学",
+    "email": "liufang@school.edu",
+    "phone": "13800138004",
+    "maxHours": 16,
+    "office": "教学楼B202",
+    "availableTimes": [
+      "周一2-4",
+      "周二2-4",
+      "周三2-4",
+      "周四2-4",
+      "周五2-4"
+    ]
+  },
+  {
+    "id": "T005",
+    "name": "陈明",
+    "gender": "男",
+    "subject": "物理",
+    "email": "chenming@school.edu",
+    "phone": "13800138005",
+    "maxHours": 16,
+    "office": "实验楼C101",
+    "availableTimes": [
+      "周一1-3",
+      "周二1-4",
+      "周三1-3",
+      "周四1-4",
+      "周五1-2"
+    ]
+  },
+  {
+    "id": "T006",
+    "name": "赵雪",
+    "gender": "女",
+    "subject": "物理",
+    "email": "zhaoxue@school.edu",
+    "phone": "13800138006",
+    "maxHours": 14,
+    "office": "实验楼C102",
+    "availableTimes": [
+      "周一4-5",
+      "周二3-5",
+      "周三4-5",
+      "周四3-5",
+      "周五3-4"
+    ]
+  },
+  {
+    "id": "T007",
+    "name": "周杰",
+    "gender": "男",
+    "subject": "英语",
+    "email": "zhoujie@school.edu",
+    "phone": "13800138007",
+    "maxHours": 12,
+    "office": "外语楼501",
+    "availableTimes": [
+      "周一1-3",
+      "周二1-3",
+      "周三1-3",
+      "周四1-3",
+      "周五1-3"
+    ]
+  },
+  {
+    "id": "T008",
+    "name": "吴霞",
+    "gender": "女",
+    "subject": "英语",
+    "email": "wuxia@school.edu",
+    "phone": "13800138008",
+    "maxHours": 12,
+    "office": "外语楼502",
+    "availableTimes": [
+      "周一4-6",
+      "周二4-6",
+      "周三4-6",
+      "周四4-6",
+      "周五4-6"
+    ]
+  },
+  {
+    "id": "T009",
+    "name": "郑勇",
+    "gender": "男",
+    "subject": "政治",
+    "email": "zhengyong@school.edu",
+    "phone": "13800138009",
+    "maxHours": 14,
+    "office": "行政楼301",
+    "availableTimes": [
+      "周一1-4",
+      "周二1-4",
+      "周三1-4",
+      "周四1-4",
+      "周五1-4"
+    ]
+  },
+  {
+    "id": "T010",
+    "name": "孙丽",
+    "gender": "女",
+    "subject": "政治",
+    "email": "sunli@school.edu",
+    "phone": "13800138010",
+    "maxHours": 12,
+    "office": "行政楼302",
+    "availableTimes": [
+      "周一5-7",
+      "周二5-7",
+      "周三5-7",
+      "周四5-7",
+      "周五5-7"
+    ]
+  },
+  {
+    "id": "T011",
+    "name": "黄磊",
+    "gender": "男",
+    "subject": "历史",
+    "email": "huanglei@school.edu",
+    "phone": "13800138011",
+    "maxHours": 12,
+    "office": "文科院101",
+    "availableTimes": [
+      "周一2-4",
+      "周二2-4",
+      "周三2-4",
+      "周四2-4",
+      "周五2-4"
+    ]
+  },
+  {
+    "id": "T012",
+    "name": "林静",
+    "gender": "女",
+    "subject": "经济",
+    "email": "linjing@school.edu",
+    "phone": "13800138012",
+    "maxHours": 14,
+    "office": "经管楼201",
+    "availableTimes": [
+      "周一1-3",
+      "周二1-3",
+      "周三1-3",
+      "周四1-3",
+      "周五1-3"
+    ]
+  },
+  {
+    "id": "T013",
+    "name": "杨涛",
+    "gender": "男",
+    "subject": "体育",
+    "email": "yangtao@school.edu",
+    "phone": "13800138013",
+    "maxHours": 16,
+    "office": "体育馆103",
+    "availableTimes": [
+      "周一3-5",
+      "周二3-5",
+      "周三3-5",
+      "周四3-5",
+      "周五3-5"
+    ]
+  },
+  {
+    "id": "T014",
+    "name": "马超",
+    "gender": "男",
+    "subject": "计算机",
+    "email": "machao@school.edu",
+    "phone": "13800138014",
+    "maxHours": 14,
+    "office": "教学楼A305",
+    "availableTimes": [
+      "周一5-7",
+      "周二5-7",
+      "周三5-7",
+      "周四5-7",
+      "周五5-7"
+    ]
+  },
+  {
+    "id": "T015",
+    "name": "朱敏",
+    "gender": "女",
+    "subject": "计算机",
+    "email": "zhumin@school.edu",
+    "phone": "13800138015",
+    "maxHours": 12,
+    "office": "教学楼A306",
+    "availableTimes": [
+      "周一1-2",
+      "周二1-2",
+      "周三1-2",
+      "周四1-2",
+      "周五1-2"
+    ]
+  }
+]
