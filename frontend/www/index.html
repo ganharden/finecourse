@@ -368,13 +368,7 @@
     
     <script>
 // ========== 配置 ==========
-// 后端 API 地址 - 改为你的服务器公网地址
-// 如果后端部署在公网，改成: https://your-domain.com/api
-// 如果后端在同一局域网，用局域网IP: http://192.168.x.x:3001/api
-// 如果在手机4G/5G网络，后端必须能公网访问
-const API = 'http://localhost:3001/api';
-
-// 完整离线数据（所有初始数据）
+// 离线数据（所有初始数据）
 const offlineData = {
     courses: [
         {id:'CS101',name:'数据结构与算法',category:'计算机',credits:3,hours:48,maxStudents:60,tags:['核心','必修'],description:'介绍常见数据结构与算法设计方法'},
@@ -1095,6 +1089,11 @@ function goToSection(section){
     document.querySelector(`[data-section="${section}"]`).click();
 }
 
+// ========== AI 聊天 - 全局配置 ==========
+const ALIYUN_API_KEY = 'sk-sp-8da761414a5545e8b2763ca4b6f17fd9';
+const ALIYUN_API_URL = 'https://coding.dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation';
+const DEFAULT_LLM_MODEL = 'qwen3-max-2026-01-23';
+
 // ========== AI 聊天 ==========
 let chatHistory = [];
 
@@ -1108,74 +1107,63 @@ async function sendChatMessage() {
     addChatMessage('user', message);
     input.value = '';
     
-    if (!isOnline) {
-        addChatMessage('ai', '⚠️ 当前处于离线模式，AI 助手不可用。\n\n请确保手机和电脑在同一 WiFi 网络，或访问在线版本。');
-        return;
-    }
-    
     showTypingIndicator();
     sendBtn.disabled = true;
     
     try {
-        const response = await fetch(API + '/ai/chat', {
+        // 构建消息历史
+        const messages = [
+            { role: 'system', content: `你是一个智能排课助手，帮助用户管理课程、教师、学生和教室数据。你不知道具体的用户数据，但可以帮用户查询、分析和建议。
+
+## 数据说明
+- 课程：包含ID、名称、类别（计算机、数学、物理、英语、政治、历史、文科、体育）、学分、最大人数等
+- 教师：包含ID、姓名、性别、科目、电话、办公室、最大课时数、可排课时间等
+- 学生：包含ID、姓名、性别、年级、专业、班级等
+- 教室：包含ID、名称、容量、楼栋、设备、类型等
+- 班级：包含ID、名称、专业、年级、学生人数等
+- 课表：已经排好的课程安排
+
+## 可以做什么
+1. 查询任何数据（如"查询所有课程"、"查询数学老师"）
+2. 分析数据（如"统计各科课程数量"）
+3. 提供建议（如"建议的排课方案"）
+4. 简单的欢迎和闲聊
+
+请根据上下文理解用户意图，提供有用的信息或建议。` },
+            ...chatHistory.slice(-10).map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+            { role: 'user', content: message }
+        ];
+        
+        // 调用阿里云 DashScope API
+        const response = await fetch(ALIYUN_API_URL, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ message })
+            headers: {
+                'Authorization': `Bearer ${ALIYUN_API_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                model: DEFAULT_LLM_MODEL,
+                input: { messages },
+                parameters: {
+                    result_format: 'text'
+                }
+            })
         });
         
         const result = await response.json();
         removeTypingIndicator();
         
-        addChatMessage('ai', result.reply || '处理完成');
-        
-        // 执行操作
-        if (result.intent === 'auto') {
-            setTimeout(async () => {
-                showTypingIndicator();
-                try {
-                    const execRes = await fetch(API + '/ai/execute', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ intent: 'auto', params: result.params })
-                    });
-                    const execResult = await execRes.json();
-                    removeTypingIndicator();
-                    if (execResult.success) {
-                        addChatMessage('ai', `✅ ${execResult.message}`);
-                        await loadAllData();
-                    } else {
-                        addChatMessage('ai', `❌ ${execResult.error}`);
-                    }
-                } catch (e) {
-                    removeTypingIndicator();
-                    addChatMessage('ai', '❌ 执行出错: ' + e.message);
-                }
-            }, 500);
-        }
-        
-        if (result.intent === 'query') {
-            setTimeout(async () => {
-                showTypingIndicator();
-                try {
-                    const execRes = await fetch(API + '/ai/execute', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ intent: 'query', params: result.params })
-                    });
-                    const execResult = await execRes.json();
-                    removeTypingIndicator();
-                    if (execResult.success) {
-                        addChatMessage('ai', execResult.message);
-                    }
-                } catch (e) {
-                    removeTypingIndicator();
-                }
-            }, 500);
+        if (result.code === 200 && result.output && result.output.text) {
+            const reply = result.output.text.trim();
+            addChatMessage('ai', reply);
+            chatHistory.push({ sender: 'ai', text: reply });
+        } else {
+            addChatMessage('ai', `❌ AI 服务出错: ${result.message || '未知错误'}`);
         }
         
     } catch (error) {
         removeTypingIndicator();
-        addChatMessage('ai', '抱歉，服务暂时不可用。请检查网络连接。');
+        addChatMessage('ai', '❌ 网络错误或 API 调用失败: ' + error.message);
     }
     
     sendBtn.disabled = false;
